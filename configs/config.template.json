@@ -1,0 +1,22 @@
+{
+    "db": {
+        "host": "",
+        "name": "",
+        "username": "",
+        "password": ""
+    },
+    "server": {
+        "port": 3000
+    },
+    "webhook_url": "",
+    "email_server": {
+        "host": "",
+        "port": 465,
+        "secure": true,
+        "auth": {
+            "user": "",
+            "pass": ""
+        },
+        "from": ""
+    }
+}

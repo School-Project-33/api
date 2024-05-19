@@ -1,0 +1,109 @@
+{
+	"openapi": "3.0.0",
+	"info": {
+		"title": "Hanz Car Rentals API",
+		"description": "This API is made for Hanz Car Rentals as a school project.",
+		"version": "2.1.6",
+		"contact": {
+			"name": "Hanz",
+			"email": "hanzcar.rentals@wolfsoft.solutions",
+			"url": "https://www.hanzcar.rentals/support"
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		},
+		"responses": {
+			"UnauthorizedError": {
+				"description": "Unauthorized",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						}
+					}
+				}
+			},
+			"BadRequestError": {
+				"description": "Bad request",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						}
+					}
+				}
+			},
+			"NotFoundError": {
+				"description": "Not found",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						}
+					}
+				}
+			},
+			"ServerError": {
+				"description": "Server error",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						}
+					}
+				}
+			}
+		},
+		"schemas": {
+			"Error": {
+				"type": "object",
+				"properties": {
+					"status": {
+						"type": "integer"
+					},
+					"message": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	},
+	"security": [
+		{
+			"bearerAuth": []
+		}
+	],
+	"servers": [
+		{
+			"url": "https://api.hanzcar.rentals/api/v2/",
+			"description": "Production server"
+		},
+		{
+			"url": "http://localhost:55600/api/v2/",
+			"description": "Development server"
+		}
+	],
+	"paths": {
+		"/": {
+			"get": {
+				"summary": "Root endpoint",
+				"tags": [
+					"Default"
+				],
+				"description": "This is the root endpoint for the API service",
+				"security": [],
+				"responses": {
+					"418": {
+						"description": "I'm a teapot"
+					}
+				}
+			}
+		}
+	}
+}

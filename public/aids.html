@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    </head>
+    <body>
+        <h2>API Test Form</h2>
+        <form id="apiForm">
+            <label for="apiURL">API Endpoint:</label><br>
+            <input type="text" id="apiURL" name="apiURL" value="http://localhost:55559/api/v2/" placeholder="/api/v1/users/add"><br>
+            <label for="method">method:</label><br>
+            <input type="text" id="method" name="method" value="" placeholder="post, get, patch, put, delete"><br>
+            <label for="apiKey">API Key:</label><br>
+            <input type="text" id="apiKey" name="apiKey" value=""><br>
+            <label for="requestData">Request Data (in JSON format):</label><br>
+            <textarea id="requestData" name="requestData" rows="4" cols="50"></textarea><br>
+            <button type="button" onclick="sendRequest()">Send Request</button>
+        </form>
+        <h2>response:</h2>
+        <div id="response"></div>
+
+        <script>
+            function sendRequest() {
+                var apiURL = document.getElementById("apiURL").value;
+                var method = document.getElementById("method").value;
+                var apiKey = document.getElementById("apiKey").value;
+                var requestData = document.getElementById("requestData").value;
+
+                apiURL = "http://localhost:3003/api/v1/zabbix/";
+                method = "GET";
+                apiKey = "";
+                requestData = json.stringify({"message": "Aids", "subject": "Aids 2.0", "severity": 5, "status": "OK"});
+
+                var xhr = new XMLHttpRequest();
+                xhr.open(method.toUpperCase(), apiURL);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.setRequestHeader("Authorization", "Bearer "+apiKey);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        document.getElementById("response").innerHTML = JSON.stringify(response, null, 2);
+                    } else {
+                        document.getElementById("response").innerHTML = "Error: " + xhr.status;
+                    }
+                    }
+                };
+                xhr.send(requestData);
+            }
+        </script>
+
+    </body>
+</html>
