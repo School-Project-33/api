@@ -61,6 +61,7 @@ db.query("CREATE TABLE IF NOT EXISTS users ( \
 	email TEXT NOT NULL, \
 	email_verified BOOLEAN, \
 	email_verify_token TEXT, \
+	phone_number TEXT, \
 	token BLOB, \
 	token_expires_at TIMESTAMP, \
 	password BLOB NOT NULL, \
@@ -68,7 +69,7 @@ db.query("CREATE TABLE IF NOT EXISTS users ( \
 	password_reset_token TEXT, \
 	password_reset_token_expires_at TIMESTAMP, \
 	role INT NOT NULL DEFAULT 6, \
-	verified_drivers_licence BOOLEAN, \
+	seller BOOLEAN, \
 	scheduled_for_deletion BOOLEAN, \
 	scheduled_for_deletion_at DATE, \
 	account_disabled BOOLEAN, \

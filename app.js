@@ -3,14 +3,14 @@ var createError = require('http-errors');
 var express = require('express');
 var logger = require('morgan');
 var { send_error } = require('./functions/error.js');
-// let db = require('./db.js');
-// var { query } = require(`./functions/database_queries.js`);
+let db = require('./db.js');
+var { query } = require(`./functions/database_queries.js`);
 
 // require the routers
 var indexRouter = require('./routes/index');
 
-// global.db = db;
-// global.query = query;
+global.db = db;
+global.query = query;
 
 // whipe deleted users daily
 // var { start_daily_jobs } = require('./functions/daily_checks');
