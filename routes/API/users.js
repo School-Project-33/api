@@ -4,13 +4,20 @@ var crypto = require("crypto");
 var { newUser, forgot_password } = require("../../functions/email");
 var { send_error } = require("../../functions/error");
 var {
-  check_user_token,
-  user_check,
-  check_permission
+  check_user_token
 } = require("../../functions/middleware");
 
 // create the router
 var router = express.Router();
+
+router.post("/register", function (req, res){
+	console.log(req.body);
+	
+	res.json({
+		status: 200,
+		message: "Successfully registered"
+	});
+});
 
 router.post("/login", function (req, res) {
 	let email = req.body.email;
@@ -108,62 +115,8 @@ router.post("/login", function (req, res) {
 	);
 });
 
-router.post("/add", async function (req, res) {
-	let first_name = req.body.first_name;
-	let last_name = req.body.last_name;
-	let email = req.body.email;
-	let password = req.body.password;
-
-	if(!first_name || !last_name || !email || !password) {
-		res.send({ status: 400, message: "Missing required fields" });
-		return;
-	}
-
-	let email_check = await query("SELECT email FROM users WHERE email = ?", [email]);
-	if(email_check.length > 0) {
-		res.send({ status: 400, message: "Email already in use" });
-		return;
-	}
-
-	const salt = crypto.randomBytes(16).toString("hex");
-	// Hash the password using the salt
-	crypto.pbkdf2(
-		password,
-		salt,
-		310000,
-		32,
-		"sha256",
-		function (err, hashedPassword) {
-			if (err) throw err;
-			// Insert the salt into the salts table
-			db.query(
-				"INSERT INTO salts (salt) VALUES (?)",
-				[salt],
-				function (err, result) {
-					if (err) throw err;
-
-					// Get the ID of the inserted salt
-					const saltId = result.insertId;
-
-					// Insert the user into the users table with the salt ID
-					db.query(
-						"INSERT INTO users (first_name, last_name, email, password, salt) VALUES (?, ?, ?, ?, ?)",
-						[first_name, last_name, email, hashedPassword, saltId],
-						function (err, result) {
-							if (err) throw err;
-							// Send the new user an email
-							newUser(first_name, email, result.insertId, req.headers.host);
-							res.send({ status: 200, message: "Successfully added user" });
-						}
-					);
-				}
-			);
-		}
-	);
-});
-
 // users route to get all users as admin user
-router.get("/", check_user_token, check_permission("ADMIN"), function (req, res) {
+router.get("/", check_user_token, function (req, res) {
 	db.query(
 		"SELECT id,first_name,last_name,email,email_verified,role,verified_drivers_licence,times_rented,created_at,updated_at FROM users",
 		function (error, results, fields) {
@@ -175,41 +128,6 @@ router.get("/", check_user_token, check_permission("ADMIN"), function (req, res)
 					status: 200,
 					message: "Successfully got users",
 					data: results,
-				});
-			}
-		}
-	);
-});
-
-// users/user/{id} route to get a single user
-router.get("/user/:id", check_user_token, user_check, function (req, res) {
-	db.query(
-		"SELECT id,first_name,last_name,email,email_verified,role,verified_drivers_licence,times_rented,created_at,updated_at FROM users WHERE id =?",
-		[req.params.id],
-		function (error, results, fields) {
-			if (error) {
-				send_error(error, "Error getting user");
-				res.send({ status: 500, message: "Error getting user" });
-			} else {
-				// get the role info from the roles table:
-				db.query(
-				"SELECT * FROM roles WHERE id =?",
-				[results[0].role],
-				function (error, role_results, fields) {
-					if (error) {
-					send_error(error, "Error getting user");
-					throw error;
-					}
-					if (role_results.length < 1) {
-					res.send({ status: 500, message: "Error getting user" });
-					return;
-					}
-					results[0].role = role_results[0];
-					res.send({
-						status: 200,
-						message: "Successfully got user",
-						data: results[0],
-					});
 				});
 			}
 		}
@@ -370,76 +288,6 @@ router.put("/update_password", function (req, res) {
 			}
 		}
 	);
-});
-
-// users/validate/drivers-license
-router.post("/validate/drivers-license", check_user_token, function (req, res) {
-	let token = req.headers["authorization"].split(" ")[1];
-	db.query(
-		"UPDATE users SET verified_drivers_licence =? WHERE token =?",
-		[1, token],
-		function (error, results, fields) {
-			if (error) {
-				send_error(error, "Error validating drivers license");
-				res.send({ status: 500, message: "Error validating drivers license" });
-			} else {
-				res.send({
-					status: 200,
-					message: "Successfully validated drivers license",
-				});
-			}
-		}
-	);
-});
-
-// users/update/{id} route to update a user
-router.put("/update/:id", check_user_token, user_check, function (req, res) {
-	let first_name = req.body.first_name;
-	let last_name = req.body.last_name;
-	let email = req.body.email;
-	db.query(
-		"UPDATE users SET first_name =?, last_name =?, email =? WHERE id =?",
-		[first_name, last_name, email, req.params.id],
-		function (error, results, fields) {
-			if (error) {
-				send_error(error, "Error updating user");
-				res.send({ status: 500, message: "Error updating user" });
-			} else {
-				res.send({ status: 200, message: "Successfully updated user" });
-			}
-		}
-	);
-});
-
-// users/update/role/:id route to update a user's role
-router.put("/update/role/:id", check_user_token, check_permission("UPDATE_PEOPLE_ROLES"), function (req, res) {
-	let role = req.body.role;
-
-	// if the user doesn't have their email verified then return a 403 because the user isn't allowed a new role.
-	db.query("SELECT * FROM users WHERE id = ?", [req.params.id], function (error, results, fields) {
-		if (error) {
-			send_error(error, "Error updating user role");
-			res.send({ status: 500, message: "Error updating user role" });
-		} else {
-			if (results[0].email_verified === 0) {
-				res.status(403).send({ status: 403, message: "User's email isn't verified" });
-				return;
-			} else {
-				db.query(
-					"UPDATE users SET role =? WHERE id =?",
-					[role, req.params.id],
-					function (error, results, fields) {
-						if (error) {
-							send_error(error, "Error updating user role");
-							res.status(500).send({ status: 500, message: "Error updating user role" });
-						} else {
-							res.send({ status: 200, message: "Successfully updated user role" });
-						}
-					}
-				);
-			}
-		}
-	});
 });
 
 // users/verify/{email_verify_token}

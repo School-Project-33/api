@@ -92,7 +92,7 @@ db.query("SELECT * FROM users", function (err, result) {
 		// Generate a random salt
 		const salt = crypto.randomBytes(16).toString('hex');
 		// Hash the password using the salt
-		const password = 'Admin'; // Set your default password here
+		const password = config.defaultUser.password; // Set your default password here
 		crypto.pbkdf2(password, salt, 310000, 32, 'sha256', function(err, hashedPassword) {
 			if (err) throw err;
 			// Insert the salt into the salts table
@@ -104,7 +104,7 @@ db.query("SELECT * FROM users", function (err, result) {
 
 				// Insert the user into the users table with the salt ID
 				db.query("INSERT INTO users (first_name, last_name, email, email_verified, password, salt, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
-				['Admin', 'Admin', 'admin@wolfsoft.solutions', 1, hashedPassword, saltId, 1],
+				[config.defaultUser.first_name, config.defaultUser.last_name, config.defaultUser.email, 1, hashedPassword, saltId, config.defaultUser.role],
 				function (err, result) {
 					if (err) throw err;
 						console.log("Default user created");
@@ -163,7 +163,10 @@ db.query("SELECT * FROM categories", function (err, result) {
 		db.query("INSERT INTO categories (name, description) VALUES (?, ?)", ['Biography', 'Biography category']);
 		db.query("INSERT INTO categories (name, description) VALUES (?, ?)", ['Autobiography', 'Autobiography category']);
 		db.query("INSERT INTO categories (name, description) VALUES (?, ?)", ['Self-Help', 'Self-Help category']);
-		db.query("INSERT INTO categories (name, description) VALUES (?, ?)", ['Cookbook', 'Cookbook category']);
+		db.query("INSERT INTO categories (name, description) VALUES (?, ?)", ['Cookbook', 'Cookbook category'], async function (err, result) {
+			if (err) throw err;
+			console.log("Default categories created");
+		});
 	}
 });
 
@@ -216,8 +219,54 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	}
 });
 
+// // create the reviews table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, book_id INT NOT NULL, user_id INT NOT NULL, review TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (book_id) REFERENCES books(id), FOREIGN KEY (user_id) REFERENCES users(id)
+// db.query("CREATE TABLE IF NOT EXISTS reviews ( \
+// 	id INT AUTO_INCREMENT PRIMARY KEY, \
+// 	book_id INT NOT NULL, \
+// 	user_id INT NOT NULL, \
+// 	review TEXT NOT NULL, \
+// 	rating INT NOT NULL, \
+// 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
+// 	FOREIGN KEY (book_id) REFERENCES books(id), \
+// 	FOREIGN KEY (user_id) REFERENCES users(id) \
+// )", function (err, result) {
+// 	if (err) throw err;
+// 	if(result.changedRows > 0){
+// 		console.log("Table reviews created");
+// 	}
+// });
 
+// // create the baskets table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id)
+// db.query("CREATE TABLE IF NOT EXISTS baskets ( \
+// 	id INT AUTO_INCREMENT PRIMARY KEY, \
+// 	user_id INT NOT NULL, \
+// 	items blob NOT NULL, \
+// 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
+// 	FOREIGN KEY (user_id) REFERENCES users(id) \
+// )", function (err, result) {
+// 	if (err) throw err;
+// 	if(result.changedRows > 0){
+// 		console.log("Table baskets created");
+// 	}
+// });
 
+// // create the orders table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, basket_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (book_id) REFERENCES books(id)
+// db.query("CREATE TABLE IF NOT EXISTS orders ( \
+// 	id INT AUTO_INCREMENT PRIMARY KEY, \
+// 	user_id INT NOT NULL, \
+// 	basket_id INT NOT NULL, \
+// 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
+// 	FOREIGN KEY (user_id) REFERENCES users(id), \
+// 	FOREIGN KEY (basket_id) REFERENCES baskets(id) \
+// )", function (err, result) {
+// 	if (err) throw err;
+// 	if(result.changedRows > 0){
+// 		console.log("Table orders created");
+// 	}
+// });
 
 // export the db connection
 module.exports = db;

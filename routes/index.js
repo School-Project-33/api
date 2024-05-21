@@ -15,11 +15,11 @@ router.use((req, res, next) => {
 var apiRouter = require('./api');
 var docsRouter = require('./docs.js');
 
-router.use('/api/v2', apiRouter);
-router.use('/docs/v2', docsRouter);
+router.use('/api/v1', apiRouter);
+router.use('/docs/v1', docsRouter);
 
 router.get('/', function (req, res) {
-  res.redirect("/docs/v2");
+  res.redirect("/docs/v1");
 });
 
 

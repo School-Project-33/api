@@ -19,7 +19,7 @@ async function send_mail(email, text, subject){
         from: config.email_server.from,
         to: email,
         subject: subject,
-        text: `THIS IS A SCHOOL PROJECT! THIS IS NOT REAL\n\n\n${text}\n\nThank you for using Hanz Car Rentals.\n\nPS: This is an automated message. & THIS IS A SCHOOL PROJECT! THIS IS NOT REAL`
+        text: `${text}\n\nBedankt dat u gebruik maakt van E-Schrijvers.\n\nPS: Dit is een geautomatiseert bericht.`
     }).catch((err) => {
         if(err) {
             send_error(err, 'Send E-mail');
@@ -36,8 +36,8 @@ async function newUser(fname, email, id, host){
             throw err;
         };
 
-        let subject = 'Account Verification';
-        let text = 'Dear '+ fname +'\nYour e-mail has been used for an account at Hanz Car Rentals.\n\nPlease click the following link to verify your account: https://' + host + '/api/v2/users/verify/' + token +'\n\nIf you did not create an account, please send an email to hanz.car.rentals@wolfsoft.solutions so we can remove the account assosiated with this account.';
+        let subject = 'Account verificatie';
+        let text = 'Beste '+ fname +'\nUw e-mail is gebruikt om een account aan te maken bij E-Schrijvers.\n\nPlease click the following link to verify your account: https://' + host + '/api/v1/users/verify/' + token +'\n\nAls u geen account heeft aangemaakt, stuur dan een e-mail naar support-e.schrijvers@wolfsoft.solutions zodat we het account dat aan dit account is gekoppeld, kunnen verwijderen.';
     
         send_mail(email, text, subject);
     });
@@ -51,8 +51,8 @@ async function forgot_password(email, id, host){
             throw err;
         };
 
-        let subject = 'Reset Password';
-        let text = 'Please copy and paste the following token in the password reset form: ' +token;
+        let subject = 'Wachtwoord opnieuw instellen';
+        let text = 'Kopieer en plak het volgende token in het formulier voor het opnieuw instellen van het wachtwoord: ' +token;
      
         send_mail(email, text, subject);
     });
@@ -61,9 +61,9 @@ async function forgot_password(email, id, host){
 async function contact_mail(email, subject, message) {
     await transporter.sendMail({
         from: config.email_server.from,
-        to: `hcr@wolfsoft.solutions`,
+        to: `info.e.schrijvers@wolfsoft.solutions`,
         subject: subject,
-        text: `THIS IS A SCHOOL PROJECT! THIS IS NOT REAL\n\n\n${message}\n\nThank you for using Hanz Car Rentals.\n\nPS: This is an automated message. & THIS IS A SCHOOL PROJECT! THIS IS NOT REAL`,
+        text: `${message}\n\nBedankt dat u gebruik maakt van E-Schrijvers.`,
         replyTo: email
     }).catch((err) => {
         if(err) {
@@ -71,7 +71,7 @@ async function contact_mail(email, subject, message) {
             throw err;
         };
     });
-} 
+}
 
 module.exports = {
     newUser,

@@ -81,11 +81,11 @@
 	],
 	"servers": [
 		{
-			"url": "https://api.hanzcar.rentals/api/v2/",
+			"url": "https://solarhosting.nl:60258/api/v1/",
 			"description": "Production server"
 		},
 		{
-			"url": "http://localhost:55600/api/v2/",
+			"url": "http://localhost:60258/api/v1/",
 			"description": "Development server"
 		}
 	],
@@ -101,6 +101,65 @@
 				"responses": {
 					"418": {
 						"description": "I'm a teapot"
+					}
+				}
+			}
+		},
+		"/users/register": {
+			"post": {
+				"summary": "Register a new user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to register a new user",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									},
+									"firstname": {
+										"type": "string"
+									},
+									"lastname": {
+										"type": "string"
+									},
+									"phoneNumber": {
+										"type": "string"
+									},
+									"seller": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"email",
+									"password",
+									"firstName",
+									"lastName",
+									"seller",
+									"phoneNumber"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "User created"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
 					}
 				}
 			}
