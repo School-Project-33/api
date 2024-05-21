@@ -123,13 +123,13 @@
 									"email": {
 										"type": "string"
 									},
-									"password": {
-										"type": "string"
-									},
 									"firstname": {
 										"type": "string"
 									},
 									"lastname": {
+										"type": "string"
+									},
+									"password": {
 										"type": "string"
 									},
 									"phoneNumber": {
@@ -141,9 +141,9 @@
 								},
 								"required": [
 									"email",
-									"password",
 									"firstName",
 									"lastName",
+									"password",
 									"seller",
 									"phoneNumber"
 								]
