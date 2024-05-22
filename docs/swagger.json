@@ -1,14 +1,9 @@
 {
 	"openapi": "3.0.0",
 	"info": {
-		"title": "Hanz Car Rentals API",
-		"description": "This API is made for Hanz Car Rentals as a school project.",
-		"version": "2.1.6",
-		"contact": {
-			"name": "Hanz",
-			"email": "hanzcar.rentals@wolfsoft.solutions",
-			"url": "https://www.hanzcar.rentals/support"
-		}
+		"title": "E-schrijvers API",
+		"description": "This API is made for e-schrijvers as a school project.",
+		"version": "2.1.6"
 	},
 	"components": {
 		"securitySchemes": {
