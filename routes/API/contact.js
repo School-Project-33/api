@@ -29,6 +29,7 @@ router.post("/", async function (req, res) {
 
     } catch (err) {
         console.error(err);
+        send_error(err, "Posting contact form failed");
         res.status(500).send({ "status": 500, "message": "Internal Server Error" });
     }
 });
