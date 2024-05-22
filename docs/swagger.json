@@ -163,6 +163,57 @@
 					}
 				}
 			}
+		},
+		"/contact": {
+			"post": {
+				"summary": "Contact us",
+				"tags": [
+					"Default"
+				],
+				"description": "This endpoint is used to contact us",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									},
+									"subject": {
+										"type": "string"
+									},
+									"message": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email",
+									"name",
+									"subject",
+									"message"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Message sent"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
 		}
 	}
 }

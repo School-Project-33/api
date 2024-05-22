@@ -5,8 +5,10 @@ var express = require('express');
 var router = express.Router();
 
 var usersRouter = require('./API/users');
+var contactRouter = require('./API/contact');
 
 router.use('/users', usersRouter);
+router.use('/contact', contactRouter);
 
 router.get('/', function(req, res, next){
     res.json({
