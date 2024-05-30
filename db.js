@@ -68,7 +68,7 @@ db.query("CREATE TABLE IF NOT EXISTS users ( \
 	salt INT NOT NULL, \
 	password_reset_token TEXT, \
 	password_reset_token_expires_at TIMESTAMP, \
-	role INT NOT NULL DEFAULT 6, \
+	role INT NOT NULL DEFAULT 5, \
 	seller BOOLEAN, \
 	scheduled_for_deletion BOOLEAN, \
 	scheduled_for_deletion_at DATE, \

@@ -6,74 +6,159 @@ var { send_error } = require("../../functions/error");
 var {
   check_user_token
 } = require("../../functions/middleware");
-const { promisify } = require('util');
 
 // create the router
 var router = express.Router();
 
-router.post("/register", async function (req, res) {
-    try {
-        const { email, password, firstname, lastname, phonenumber, seller } = req.body;
+router.post("/login", function (req, res) {
+	let email = req.body.email;
+	let password = req.body.password;
 
-        if (!email || !password || !firstname || !lastname || !phonenumber || typeof seller !== 'boolean') {
-            let missing_fields = [];
-            if (!email) missing_fields.push("email");
-            if (!password) missing_fields.push("password");
-            if (!firstname) missing_fields.push("first_name");
-            if (!lastname) missing_fields.push("last_name");
-            if (!phonenumber) missing_fields.push("phone_number");
-            if (typeof seller !== 'boolean') missing_fields.push("seller");
-            return res.status(400).send({ "status": 400, "message": `Please fill in the following fields: ${missing_fields.join(", ")}` });
-        }
-
-        // Check if the user already exists
-        const userAlreadyExist = await db.query("SELECT * FROM users WHERE email = ?", [email]);
-        if (userAlreadyExist.length > 0) return res.status(400).send({ "status": 400, "message": "User already exists" });
-
-        // Hash the password
-        const salt = crypto.randomBytes(16).toString('hex');
-        const pbkdf2 = promisify(crypto.pbkdf2);
-        const hashedPassword = await pbkdf2(password, salt, 310000, 32, 'sha256');
-
-        // Insert the salt into the salts table
-        const saltResult = await query("INSERT INTO salts (salt) VALUES (?)", [salt]);
-        const saltId = await saltResult.insertId;
-
-        // Insert the user into the users table with the salt ID
-        let userData = await query("INSERT INTO users (first_name, last_name, email, phone_number, password, salt, role, seller) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [firstname, lastname, email, phonenumber, hashedPassword.toString('hex'), await saltId, 5, seller]);
-
-        // Assuming newUser is a function that handles post-registration actions
-        newUser(firstname, email, userData.insertId, req.headers.host);
-
-        res.status(200).send({ "status": 200, "message": "User registered successfully" });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send({ "status": 500, "message": "Internal Server Error" });
-    }
+	db.query(
+		"SELECT * FROM users WHERE email = ?",
+		[email],
+		function (error, results, fields) {
+			if (error) {
+				send_error(error, "Error logging in");
+				res.send({ status: 500, message: "Error logging in" });
+			} else {
+				if (results.length < 1) {
+				    res.send({ status: 401, message: "Invalid email or password" });
+				} else {
+					let user = results[0];
+					db.query(
+						"SELECT * FROM salts WHERE id = ?",
+						[user.salt],
+						function (error, results, fields) {
+							if (error) {
+								send_error(error, "Error logging in");
+								throw error;
+							}
+							if (results.length < 1) {
+								res.send({ status: 401, message: "Invalid email or password" });
+								return;
+							}
+							let salt = results[0].salt;
+							crypto.pbkdf2(
+								password,
+								salt,
+								310000,
+								32,
+								"sha256",
+								function (err, hashedPassword) {
+									if (hashedPassword.toString("hex") == user.password.toString("hex")) {
+										// Create a user token
+										let token = crypto.randomBytes(16).toString("hex");
+										db.query(
+										"UPDATE users SET token =? WHERE id =?",
+										[token, user.id],
+										function (err, rows) {
+											if (err) {
+												send_error(err, "Updating token");
+												throw err;
+											}
+											res.send({
+                                                status: 200,
+                                                message: "Successfully logged in",
+                                                user: {
+                                                    token: token,
+                                                    id: user.id,
+                                                    first_name: user.first_name,
+                                                    last_name: user.last_name,
+                                                    email: user.email,
+                                                    role: user.role,
+                                                    email_verified: user.email_verified
+                                                }
+                                            });
+										}
+									);
+								} else {
+									res.send({
+										status: 401,
+										message: "Invalid email or password",
+									});
+								}
+								return;
+								}
+							);
+						}
+					);
+				}
+			}
+		}
+	);
 });
 
-// The verification route
-router.get("/verify/:token", async function (req, res) {
-	try {
-		const token = req.params.token;
-		const user = await query("SELECT * FROM users WHERE email_verify_token = ?", [token]);
+router.post("/register", async function (req, res) {
+	let first_name = req.body.firstname;
+	let last_name = req.body.lastname;
+	let email = req.body.email;
+	let password = req.body.password;
 
-		if (user.length === 0) return res.status(404).send({ "status": 404, "message": "Token not found" });
-
-		db.query("UPDATE users SET email_verify_token = NULL, email_verified = 1 WHERE id = ?", [user[0].id], async function (err, result) {
-			if (err) {
-				send_error(err, "Updating email verification token");
-				return res.status(500).send({ "status": 500, "message": "Internal Server Error" });
-			}
-
-			res.status(200).send({ "status": 200, "message": "Email verified successfully" });
-		});
-
-	} catch (err) {
-		console.error(err);
-		res.status(500).send({ "status": 500, "message": "Internal Server Error" });
+	if(!first_name || !last_name || !email || !password) {
+		res.send({ status: 400, message: "Missing required fields" });
+		return;
 	}
+
+	let email_check = await query("SELECT email FROM users WHERE email = ?", [email]);
+	if(email_check.length > 0) {
+		res.send({ status: 400, message: "Email already in use" });
+		return;
+	}
+
+	const salt = crypto.randomBytes(16).toString("hex");
+	// Hash the password using the salt
+	crypto.pbkdf2(
+		password,
+		salt,
+		310000,
+		32,
+		"sha256",
+		function (err, hashedPassword) {
+			if (err) throw err;
+			// Insert the salt into the salts table
+			db.query(
+				"INSERT INTO salts (salt) VALUES (?)",
+				[salt],
+				function (err, result) {
+					if (err) throw err;
+
+					// Get the ID of the inserted salt
+					const saltId = result.insertId;
+
+					// Insert the user into the users table with the salt ID
+					db.query(
+						"INSERT INTO users (first_name, last_name, email, password, salt) VALUES (?, ?, ?, ?, ?)",
+						[first_name, last_name, email, hashedPassword, saltId],
+						function (err, result) {
+							if (err) throw err;
+							// Send the new user an email
+							newUser(first_name, email, result.insertId, req.headers.host);
+							res.send({ status: 200, message: "Successfully added user" });
+						}
+					);
+				}
+			);
+		}
+	);
+});
+
+// users/verify/{email_verify_token}
+router.get("/verify/:email_verify_token", function (req, res) {
+	db.query(
+		"UPDATE users SET email_verified=?, email_verify_token=?, role=? WHERE email_verify_token =?",
+		[1, null, 5, req.params.email_verify_token],
+		function (error, results, fields) {
+			if (error) {
+				send_error(error, "Error verifying email");
+				res.send({ status: 500, message: "Error verifying email" });
+			} if(results.affectedRows === 0) {
+				res.redirect("/failed.html");
+			} else {
+				res.redirect("/success.html");
+			}
+		}
+	);
 });
 
 module.exports = router;
