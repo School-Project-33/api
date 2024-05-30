@@ -10,6 +10,78 @@ var {
 // create the router
 var router = express.Router();
 
+router.post("/register", async function (req, res) {
+	let first_name = req.body.firstname;
+	let last_name = req.body.lastname;
+	let email = req.body.email;
+	let password = req.body.password;
+
+	if(!first_name || !last_name || !email || !password) {
+		res.send({ status: 400, message: "Missing required fields" });
+		return;
+	}
+
+	let email_check = await query("SELECT email FROM users WHERE email = ?", [email]);
+	if(email_check.length > 0) {
+		res.send({ status: 400, message: "Email already in use" });
+		return;
+	}
+
+	const salt = crypto.randomBytes(16).toString("hex");
+	// Hash the password using the salt
+	crypto.pbkdf2(
+		password,
+		salt,
+		310000,
+		32,
+		"sha256",
+		function (err, hashedPassword) {
+			if (err) throw err;
+			// Insert the salt into the salts table
+			db.query(
+				"INSERT INTO salts (salt) VALUES (?)",
+				[salt],
+				function (err, result) {
+					if (err) throw err;
+
+					// Get the ID of the inserted salt
+					const saltId = result.insertId;
+
+					// Insert the user into the users table with the salt ID
+					db.query(
+						"INSERT INTO users (first_name, last_name, email, password, salt) VALUES (?, ?, ?, ?, ?)",
+						[first_name, last_name, email, hashedPassword, saltId],
+						function (err, result) {
+							if (err) throw err;
+							// Send the new user an email
+							newUser(first_name, email, result.insertId, req.headers.host);
+							res.send({ status: 200, message: "Successfully added user" });
+						}
+					);
+				}
+			);
+		}
+	);
+});
+
+// users/verify/{email_verify_token}
+router.get("/verify/:email_verify_token", function (req, res) {
+	db.query(
+		"UPDATE users SET email_verified=?, email_verify_token=?, role=? WHERE email_verify_token =?",
+		[1, null, 5, req.params.email_verify_token],
+		function (error, results, fields) {
+			if (error) {
+				send_error(error, "Error verifying email");
+				res.send({ status: 500, message: "Error verifying email" });
+			} if(results.affectedRows === 0) {
+				res.redirect("/failed.html");
+			} else {
+				res.redirect("/success.html");
+			}
+		}
+	);
+});
+
 router.post("/login", function (req, res) {
 	let email = req.body.email;
 	let password = req.body.password;
@@ -89,23 +161,35 @@ router.post("/login", function (req, res) {
 	);
 });
 
-router.post("/register", async function (req, res) {
-	let first_name = req.body.firstname;
-	let last_name = req.body.lastname;
+// forgot password 
+router.post("/forgot_password", async function (req, res) {
 	let email = req.body.email;
-	let password = req.body.password;
-
-	if(!first_name || !last_name || !email || !password) {
+	if(!email) {
 		res.send({ status: 400, message: "Missing required fields" });
 		return;
 	}
-
-	let email_check = await query("SELECT email FROM users WHERE email = ?", [email]);
-	if(email_check.length > 0) {
-		res.send({ status: 400, message: "Email already in use" });
+	let user = await query("SELECT * FROM users WHERE email = ?", [email]);
+	if(user.length < 1) {
+		res.send({ status: 400, message: "User not found" });
 		return;
 	}
+	forgot_password(email, user[0].id, req.headers.host);
+	res.send({ status: 200, message: "Successfully sent email" });
+});
 
+// reset password with the reset token
+router.post("/reset_password", async function (req, res) {
+	let password = req.body.password;
+	let token = req.body.token;
+	if(!password || !token) {
+		res.send({ status: 400, message: "Missing required fields" });
+		return;
+	}
+	let user = await query("SELECT * FROM users WHERE password_reset_token = ? AND password_reset_token_expires_at > NOW()", [token]);
+	if(user.length < 1) {
+		res.send({ status: 400, message: "Invalid token" });
+		return;
+	}
 	const salt = crypto.randomBytes(16).toString("hex");
 	// Hash the password using the salt
 	crypto.pbkdf2(
@@ -128,35 +212,15 @@ router.post("/register", async function (req, res) {
 
 					// Insert the user into the users table with the salt ID
 					db.query(
-						"INSERT INTO users (first_name, last_name, email, password, salt) VALUES (?, ?, ?, ?, ?)",
-						[first_name, last_name, email, hashedPassword, saltId],
+						"UPDATE users SET password = ?, salt = ?, password_reset_token = NULL, password_reset_token_expires_at = NULL WHERE id = ?",
+						[hashedPassword, saltId, user[0].id],
 						function (err, result) {
 							if (err) throw err;
-							// Send the new user an email
-							newUser(first_name, email, result.insertId, req.headers.host);
-							res.send({ status: 200, message: "Successfully added user" });
+							res.send({ status: 200, message: "Successfully reset password" });
 						}
 					);
 				}
 			);
-		}
-	);
-});
-
-// users/verify/{email_verify_token}
-router.get("/verify/:email_verify_token", function (req, res) {
-	db.query(
-		"UPDATE users SET email_verified=?, email_verify_token=?, role=? WHERE email_verify_token =?",
-		[1, null, 5, req.params.email_verify_token],
-		function (error, results, fields) {
-			if (error) {
-				send_error(error, "Error verifying email");
-				res.send({ status: 500, message: "Error verifying email" });
-			} if(results.affectedRows === 0) {
-				res.redirect("/failed.html");
-			} else {
-				res.redirect("/success.html");
-			}
 		}
 	);
 });

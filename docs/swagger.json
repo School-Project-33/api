@@ -267,6 +267,94 @@
 					}
 				}
 			}
+		},
+		"/users/forgot_password": {
+			"post": {
+				"summary": "Forgot password",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to request a password reset",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Password reset email sent"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/reset_password": {
+			"post": {
+				"summary": "Reset password",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to reset a password",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string"
+									},
+									"token": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password",
+									"token"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Password reset"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
 		}
 	}
 }
