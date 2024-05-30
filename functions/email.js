@@ -37,7 +37,7 @@ async function newUser(fname, email, id, host){
         };
 
         let subject = 'Account verificatie';
-        let text = 'Beste '+ fname +'\nUw e-mail is gebruikt om een account aan te maken bij E-Schrijvers.\n\nPlease click the following link to verify your account: https://' + host + '/api/v1/users/verify/' + token +'\n\nAls u geen account heeft aangemaakt, stuur dan een e-mail naar support-e.schrijvers@wolfsoft.solutions zodat we het account dat aan dit account is gekoppeld, kunnen verwijderen.';
+        let text = 'Beste '+ fname +'\nUw e-mail is gebruikt om een account aan te maken bij E-Schrijvers.\n\nKlik op de volgende link om uw email te verifiëren: http://' + host + '/api/v1/users/verify/' + token +'\n\nAls u geen account heeft aangemaakt, stuur dan een e-mail naar support-e.schrijvers@wolfsoft.solutions zodat we het account dat aan dit account is gekoppeld, kunnen verwijderen.';
     
         send_mail(email, text, subject);
     });
