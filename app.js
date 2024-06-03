@@ -3,7 +3,7 @@ var createError = require('http-errors');
 var express = require('express');
 var logger = require('morgan');
 var { send_error } = require('./functions/error.js');
-let db = require('./db.js');
+var db = require('./db.js');
 var { query } = require(`./functions/database_queries.js`);
 
 // require the routers

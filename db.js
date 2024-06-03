@@ -113,7 +113,7 @@ db.query("SELECT * FROM users", function (err, result) {
 				);
 			});
 		});
-	}
+	} else return;
 });
 
 // create the writers table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, FOREIGN KEY (user_id) REFERENCES users(id)
