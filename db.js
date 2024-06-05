@@ -121,10 +121,10 @@ db.query("CREATE TABLE IF NOT EXISTS writers ( \
 	id INT AUTO_INCREMENT PRIMARY KEY, \
 	user_id INT NOT NULL, \
 	bio TEXT NOT NULL, \
-	website_url TEXT NOT NULL, \
-	twitter_url TEXT NOT NULL, \
-	facebook_url TEXT NOT NULL, \
-	instagram_url TEXT NOT NULL, \
+	website_url TEXT, \
+	twitter_url TEXT, \
+	facebook_url TEXT, \
+	instagram_url TEXT, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
 	FOREIGN KEY (user_id) REFERENCES users(id) \
@@ -208,7 +208,10 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	long_desc TEXT NOT NULL, \
 	short_desc TEXT NOT NULL, \
 	price DECIMAL(10, 2) NOT NULL, \
-	categories TEXT NOT NULL, \
+	category_1 INT NOT NULL, \
+	category_2 INT, \
+	category_3 INT, \
+	category_4 INT, \
 	format INT NOT NULL, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
