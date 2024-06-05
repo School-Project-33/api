@@ -28,11 +28,6 @@
                 var apiKey = document.getElementById("apiKey").value;
                 var requestData = document.getElementById("requestData").value;
 
-                apiURL = "http://localhost:3003/api/v1/zabbix/";
-                method = "GET";
-                apiKey = "";
-                requestData = json.stringify({"message": "Aids", "subject": "Aids 2.0", "severity": 5, "status": "OK"});
-
                 var xhr = new XMLHttpRequest();
                 xhr.open(method.toUpperCase(), apiURL);
                 xhr.setRequestHeader("Content-Type", "application/json");
