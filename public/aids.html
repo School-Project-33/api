@@ -16,8 +16,6 @@
             <input type="text" id="apiKey" name="apiKey" value=""><br>
             <label for="requestData">Request Data (in JSON format):</label><br>
             <textarea id="requestData" name="requestData" rows="4" cols="50"></textarea><br>
-            <label for="image">Upload an image:</label><br>
-            <input type="file" id="image" name="image"><br>
             <button type="button" onclick="sendRequest()">Send Request</button>
         </form>
         <h2>response:</h2>
@@ -29,7 +27,6 @@
                 var method = document.getElementById("method").value;
                 var apiKey = document.getElementById("apiKey").value;
                 var requestData = document.getElementById("requestData").value;
-                var image = document.getElementById("image").files[0];
 
                 var xhr = new XMLHttpRequest();
                 xhr.open(method.toUpperCase(), apiURL);
