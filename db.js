@@ -120,6 +120,8 @@ db.query("SELECT * FROM users", function (err, result) {
 db.query("CREATE TABLE IF NOT EXISTS writers ( \
 	id INT AUTO_INCREMENT PRIMARY KEY, \
 	user_id INT NOT NULL, \
+	profile_image TEXT, \
+	profile_banner TEXT, \
 	bio TEXT NOT NULL, \
 	website_url TEXT, \
 	twitter_url TEXT, \
