@@ -122,7 +122,7 @@ db.query("CREATE TABLE IF NOT EXISTS writers ( \
 	user_id INT NOT NULL, \
 	profile_image TEXT, \
 	profile_banner TEXT, \
-	bio TEXT NOT NULL, \
+	bio TEXT, \
 	website_url TEXT, \
 	twitter_url TEXT, \
 	facebook_url TEXT, \
