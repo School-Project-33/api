@@ -1,7 +1,7 @@
 // require the needed modules
 var express = require("express");
 var { send_error } = require("../../functions/error");
-const { check_user_token } = require("../../functions/middleware");
+const { check_user_token, check_user_id } = require("../../functions/middleware");
 
 // create the router
 var router = express.Router();
@@ -16,7 +16,7 @@ router.get('/', async function(req, res, next){
     }
 });
 
-router.get('/:id', check_user_token, async function(req, res, next){
+router.get('/:id', async function(req, res, next){
     try {
         let writer = await query("SELECT * FROM writers WHERE id = ?", [req.params.id]);
         if(writer.length > 0){
@@ -31,7 +31,7 @@ router.get('/:id', check_user_token, async function(req, res, next){
 });
 
 // create the settings route
-router.post('/settings/:id', async function(req, res, next){
+router.post('/settings/:id', check_user_token, check_user_id, async function(req, res, next){
     try {
         let writer = await query("SELECT * FROM writers WHERE id = ?", [req.params.id]);
         if(writer.length > 0){
