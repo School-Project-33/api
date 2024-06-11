@@ -15,15 +15,24 @@ router.post("/register", async function (req, res) {
 	let last_name = req.body.lastname;
 	let email = req.body.email;
 	let password = req.body.password;
+	let phone = req.body.phonenumber;
+	let seller = req.body.seller;
 
-	if(!first_name || !last_name || !email || !password) {
+	if(!first_name || !last_name || !email || !password || typeof seller !== "boolean") {
+		let missing_fields = [];
+		if(!first_name) missing_fields.push("firstname");
+		if(!last_name) missing_fields.push("lastname");
+		if(!email) missing_fields.push("email");
+		if(!password) missing_fields.push("password");
+		if(typeof seller !== "boolean") missing_fields.push("seller");
 		res.send({ status: 400, message: "Missing required fields" });
 		return;
 	}
+	if(phone == "" || phone == undefined) phone = null;
 
 	let email_check = await query("SELECT email FROM users WHERE email = ?", [email]);
 	if(email_check.length > 0) {
-		res.send({ status: 400, message: "Email already in use" });
+		res.status(409).send({ status: 409, message: "Email already in use" });
 		return;
 	}
 
@@ -49,8 +58,8 @@ router.post("/register", async function (req, res) {
 
 					// Insert the user into the users table with the salt ID
 					db.query(
-						"INSERT INTO users (first_name, last_name, email, password, salt) VALUES (?, ?, ?, ?, ?)",
-						[first_name, last_name, email, hashedPassword, saltId],
+						"INSERT INTO users (first_name, last_name, email, seller, phone_number, password, salt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+						[first_name, last_name, email, seller, phone, hashedPassword, saltId],
 						function (err, result) {
 							if (err) throw err;
 							// Send the new user an email
@@ -65,17 +74,29 @@ router.post("/register", async function (req, res) {
 });
 
 // users/verify/{email_verify_token}
-router.get("/verify/:email_verify_token", function (req, res) {
+router.get("/verify/:email_verify_token", async function (req, res) {
+	let userInfo = await query("SELECT * FROM users WHERE email_verify_token = ?", [req.params.email_verify_token]);
+	if(userInfo.length < 1) return res.redirect("/failed.html");
+	if(userInfo[0].email_verified) return res.redirect("/success.html");
+	console.log("Writer: " + userInfo[0].seller)
+	let role;
+	if(userInfo[0].seller) {
+		role = 3;
+	} else {
+		role = 4;
+	}
 	db.query(
 		"UPDATE users SET email_verified=?, email_verify_token=?, role=? WHERE email_verify_token =?",
-		[1, null, 5, req.params.email_verify_token],
-		function (error, results, fields) {
+		[1, null, role, req.params.email_verify_token],
+		async function (error, results, fields) {
 			if (error) {
 				send_error(error, "Error verifying email");
 				res.send({ status: 500, message: "Error verifying email" });
 			} if(results.affectedRows === 0) {
 				res.redirect("/failed.html");
 			} else {
+				let user_id = userInfo[0].id;
+				await query("INSERT INTO writers (user_id) VALUES (?)", [user_id]);
 				res.redirect("/success.html");
 			}
 		}
