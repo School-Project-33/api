@@ -31,20 +31,6 @@ router.get("/", async function (req, res) {
     }
 });
 
-// router.post("/add/cover_image", upload.single("image"), async function (req, res) {
-//     try {
-//         if(!req.file){
-//             console.log("No file uploaded")
-//             return res.status(400).send({ status: 400, message: "No file uploaded" });
-//         }
-//         let filePath = req.file.path.split("/public/")[1] || req.file.path.split("\\public\\")[1].replace(/\\/g, "/");
-//         res.json({ message: "Book added successfully! I think", path: "/"+filePath });
-//     } catch (err) {
-//         res.status(500).json({ message: "An error occurred" });
-//         send_error(err, res);
-//     }
-// });
-
 router.post('/add', upload.fields([
     { name: 'cover_image', maxCount: 1 },
     { name: 'book_image', maxCount: 10 }
