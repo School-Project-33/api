@@ -355,6 +355,219 @@
 					}
 				}
 			}
+		},
+		"/writers": {
+			"get": {
+				"summary": "Get all writers",
+				"tags": [
+					"Writers"
+				],
+				"description": "This endpoint is used to get all writers",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Writers found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"profile_image": {
+												"type": "string"
+											},
+											"profile_banner": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"public_email": {
+												"type": "string"
+											},
+											"bio": {
+												"type": "string"
+											},
+											"website_url": {
+												"type": "string"
+											},
+											"twitter_url": {
+												"type": "string"
+											},
+											"facebook_url": {
+												"type": "string"
+											},
+											"instagram_url": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/writers/{id}": {
+			"get": {
+				"summary": "Get a writer",
+				"tags": [
+					"Writers"
+				],
+				"description": "This endpoint is used to get a writer",
+				"security": [],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Writers found",
+						"content": {
+							"application/json": {
+								"schema": { 
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"profile_image": {
+												"type": "string"
+											},
+											"profile_banner": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"public_email": {
+												"type": "string"
+											},
+											"bio": {
+												"type": "string"
+											},
+											"website_url": {
+												"type": "string"
+											},
+											"twitter_url": {
+												"type": "string"
+											},
+											"facebook_url": {
+												"type": "string"
+											},
+											"instagram_url": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/writers/settings/{id}": {
+			"put": {
+				"summary": "Update writer settings",
+				"tags": [
+					"Writers"
+				],
+				"description": "This endpoint is used to update a writer's settings",
+				"security": [],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"firstname": {
+										"type": "string"
+									},
+									"lastname": {
+										"type": "string"
+									},
+									"phonenumber": {
+										"type": "string"
+									},
+									"seller": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"email",
+									"firstName",
+									"lastName",
+									"seller",
+									"phoneNumber"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Writer settings updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
 		}
 	}
 }
