@@ -21,7 +21,7 @@ router.post("/register", async function (req, res) {
 	if(!first_name || !last_name || !email || !password || typeof seller !== "boolean") {
 		let missing_fields = [];
 		if(!first_name) missing_fields.push("firstname");
-		if(!last_name) missing_fields.push("lastname");
+		if(!last_name) missing_fields.push("lastname");     
 		if(!email) missing_fields.push("email");
 		if(!password) missing_fields.push("password");
 		if(typeof seller !== "boolean") missing_fields.push("seller");
