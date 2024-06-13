@@ -36,6 +36,7 @@ router.post('/add', upload.fields([
     { name: 'book_image', maxCount: 10 }
 ]), async function (req, res) {
     try {
+        console.log(req.body.requestData);
         let coverImageFilePath = req.files.cover_image[0].path.split("/public/")[1] || req.files.cover_image[0].path.split("\\public\\")[1].replace(/\\/g, "/");
         let bookImagesFilePath = req.files.book_image.map(file => file.path.split("/public/")[1] || file.path.split("\\public\\")[1].replace(/\\/g, "/"));
         res.status(200).json({ status: 200, message: 'success', paths: {cover_image: coverImageFilePath, book_images: bookImagesFilePath} });
