@@ -64,7 +64,32 @@ async function check_user_id() {
 	};
 }
 
+async function get_user_from_token() {
+    return async function(req, res, next) {
+        let webToken = req.headers['authorization'];
+        if(webToken){
+            if(webToken.startsWith("Bearer ")){
+                webToken = webToken.split(" ")[1];
+            } else {
+                webToken = undefined;
+            };
+        };
+        if(webToken){
+            let user = await query("SELECT * FROM users WHERE token =?", [webToken]);
+            if(user.length > 0){
+                req.user = user[0];
+                next();
+            } else {
+                await res.json({status: 401, message: "Unauthorized"});
+            }
+        } else {
+            await res.json({status: 401, message: "Unauthorized"});
+        }
+    }
+}
+
 module.exports = {
 	check_user_token,
-	check_user_id
+	check_user_id,
+	get_user_from_token,
 };
