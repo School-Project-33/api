@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,11 +15,7 @@
         <label for="apiKey">API Key:</label><br>
         <input type="text" id="apiKey" name="apiKey"><br>
         <label for="requestData">Request Data (in JSON format):</label><br>
-        <textarea id="requestData" name="requestData" rows="4" cols="50"></textarea><br>
-        <label for="cover_image">Upload an image:</label><br>
-        <input type="file" id="cover_image" name="cover_image"><br>
-        <label for="book_image">Upload images:</label><br>
-        <input type="file" name="book_image" id="book_image" multiple="multiple"><br><br>
+        <textarea id="requestData" name="requestData" rows="4" cols="50"></textarea><br><br>
         <button type="button" >Send Request</button>
     </form>
     <h2>Response:</h2>
@@ -31,21 +27,6 @@
             var method = document.getElementById("method").value.toUpperCase();
             var apiKey = document.getElementById("apiKey").value;
             var requestData = document.getElementById("requestData").value;
-            var cover_image = document.getElementById("cover_image").files[0];
-            var book_image = document.getElementById("book_image").files;
-
-            var formData = new FormData();
-            formData.append("requestData", requestData);
-
-            if (cover_image) {
-                formData.append("cover_image", cover_image);
-            }
-
-            if (book_image) {
-                for (var i = 0; i < book_image.length; i++) {
-                    formData.append("book_image", book_image[i]);
-                }
-            }
 
             var xhr = new XMLHttpRequest();
             xhr.open(method, apiURL);
@@ -65,7 +46,64 @@
                 document.getElementById("response").innerHTML = "Request failed.";
             };
 
-            xhr.send(formData);
+            xhr.send(requestData);
+        }
+    </script>
+</body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+<body>
+    <h2>API Test Form</h2>
+    <form id="apiForm" onsubmit="sendRequest(event)">
+        <label for="apiURL">API Endpoint:</label><br>
+        <input type="text" id="apiURL" name="apiURL" value="http://localhost:55614/api/v1/"><br>
+        <label for="method">Method:</label><br>
+        <input type="text" id="method" name="method" placeholder="post, get, patch, put, delete"><br>
+        <label for="apiKey">API Key:</label><br>
+        <input type="text" id="apiKey" name="apiKey"><br>
+        <label for="requestData">Request Data (in JSON format):</label><br>
+        <textarea id="requestData" name="requestData" rows="4" cols="50"></textarea><br><br>
+        <button type="submit">Send Request</button>
+    </form>
+    <h2>Response:</h2>
+    <pre id="response"></pre>
+
+    <script>
+        function sendRequest(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            var apiURL = document.getElementById("apiURL").value;
+            var method = document.getElementById("method").value.toUpperCase();
+            var apiKey = document.getElementById("apiKey").value;
+            var requestData = document.getElementById("requestData").value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open(method, apiURL);
+            xhr.setRequestHeader("Authorization", "Bearer " + apiKey);
+            xhr.setRequestHeader("Content-Type", "application/json"); // Set content type for JSON data
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        document.getElementById("response").innerHTML = JSON.stringify(response, null, 2);
+                    } catch (e) {
+                        document.getElementById("response").innerHTML = "Error parsing response: " + xhr.responseText;
+                    }
+                }
+            };
+
+            xhr.onerror = function () {
+                document.getElementById("response").innerHTML = "Request failed.";
+            };
+
+            xhr.send(requestData); // Send JSON data as request payload
         }
     </script>
 </body>
