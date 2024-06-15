@@ -76,6 +76,11 @@ router.put('/settings/:id', check_user_token, isSeller, check_writer_id, upload.
             let facebook_url = body.facebook_url;
             let instagram_url = body.instagram_url;
 
+            if(website_url == null || website_url == "") website_url = null;
+            if(twitter_url == null || twitter_url == "") twitter_url = null;
+            if(facebook_url == null || facebook_url == "") facebook_url = null;
+            if(instagram_url == null || instagram_url == "") instagram_url = null;
+
             let profileImageFilePath = req.files.profile_image[0].path.split("/public/")[1] || req.files.profile_image[0].path.split("\\public\\")[1].replace(/\\/g, "/");
             let ProfileBannerFilePath = req.files.profile_banner[0].path.split("/public/")[1] || req.files.profile_banner[0].path.split("\\public\\")[1].replace(/\\/g, "/");
 
