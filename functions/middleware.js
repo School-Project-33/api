@@ -1,37 +1,48 @@
 let db = require("../db");
 let { query } = require("./database_queries");
 
-async function check_user_token(req, res, next){
-	var webToken = req.headers['authorization'];
-	if(webToken){
-		if(webToken.startsWith("Bearer ")){
-			webToken = webToken.split(" ")[1];
-		} else {
-			webToken = undefined;
-		};
-	};
+async function check_user_token(req, res, next) {
+    var webToken = req.headers['authorization'];
+    console.log("Authorization header:", webToken);
 
-	if (webToken === undefined){
-		res.status(401).send({"status": 401, "message": "Invalid token"});
-	} else{
-		db.query("SELECT * FROM users WHERE token = ?", [webToken], function(err, result){
-			if (err) throw err;
-			if (result.length > 0){
-                // get the token_expires_at from the database and see if it isn't expired yet:
-                let token_expires_at = result[0].token_expires_at;
+    if (webToken) {
+        if (webToken.startsWith("Bearer ")) {
+            webToken = webToken.split(" ")[1];
+        } else {
+            webToken = undefined;
+        }
+    }
+
+    console.log("Extracted token:", webToken);
+
+    if (webToken === undefined) {
+        console.log("No token provided or token format incorrect");
+        res.status(401).send({ "status": 401, "message": "Invalid token" });
+    } else {
+        db.query("SELECT id,first_name,last_name,email,email_verified,phone_number,role,seller FROM users WHERE token = ?", [webToken], function (err, result) {
+            if (err) {
+                console.error("Database error:", err);
+                res.status(500).send({ "status": 500, "message": "Internal server error" });
+                return;
+            }
+
+            if (result.length > 0) {
+                let token_expires_at = new Date(result[0].token_expires_at);
                 let now = new Date();
                 if (token_expires_at < now) {
-                    res.status(401).json({"status": 401, "message": "Token expired"});
+                    console.log("Token expired");
+                    res.status(401).json({ "status": 401, "message": "Token expired" });
                 } else {
                     req.user = result[0];
                     next();
-                };
-			} else{
-				res.status(401).send({"status": 401, "message": "Invalid token"});
-			};
-		});
-	};
-};
+                }
+            } else {
+                console.log("Token not found in database");
+                res.status(401).send({ "status": 401, "message": "Invalid token" });
+            }
+        });
+    }
+}
 
 async function check_user_id() {
 	return function(req, res, next) {
@@ -64,32 +75,7 @@ async function check_user_id() {
 	};
 }
 
-async function get_user_from_token() {
-    return async function(req, res, next) {
-        let webToken = req.headers['authorization'];
-        if(webToken){
-            if(webToken.startsWith("Bearer ")){
-                webToken = webToken.split(" ")[1];
-            } else {
-                webToken = undefined;
-            };
-        };
-        if(webToken){
-            let user = await query("SELECT * FROM users WHERE token =?", [webToken]);
-            if(user.length > 0){
-                req.user = user[0];
-                next();
-            } else {
-                await res.json({status: 401, message: "Unauthorized"});
-            }
-        } else {
-            await res.json({status: 401, message: "Unauthorized"});
-        }
-    }
-}
-
 module.exports = {
 	check_user_token,
 	check_user_id,
-	get_user_from_token,
 };

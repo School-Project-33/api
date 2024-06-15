@@ -104,86 +104,89 @@ router.get("/verify/:email_verify_token", async function (req, res) {
 });
 
 router.post("/login", function (req, res) {
-	let email = req.body.email;
-	let password = req.body.password;
-	if(!email || !password) {
-		res.send({ status: 400, message: "Missing required fields" });
-		return;
-	}
+    let email = req.body.email;
+    let password = req.body.password;
 
-	db.query(
-		"SELECT * FROM users WHERE email = ?",
-		[email],
-		function (error, results, fields) {
-			if (error) {
-				send_error(error, "Error logging in");
-				res.send({ status: 500, message: "Error logging in" });
-			} else {
-				if (results.length < 1) {
-				    res.send({ status: 401, message: "Invalid email or password" });
-				} else {
-					let user = results[0];
-					db.query(
-						"SELECT * FROM salts WHERE id = ?",
-						[user.salt],
-						function (error, results, fields) {
-							if (error) {
-								send_error(error, "Error logging in");
-								throw error;
-							}
-							if (results.length < 1) {
-								res.send({ status: 401, message: "Invalid email or password" });
-								return;
-							}
-							let salt = results[0].salt;
-							crypto.pbkdf2(
-								password,
-								salt,
-								310000,
-								32,
-								"sha256",
-								function (err, hashedPassword) {
-									if (hashedPassword.toString("hex") == user.password.toString("hex")) {
-										// Create a user token
-										let token = crypto.randomBytes(16).toString("hex");
-										db.query(
-										"UPDATE users SET token =? WHERE id =?",
-										[token, user.id],
-										function (err, rows) {
-											if (err) {
-												send_error(err, "Updating token");
-												throw err;
-											}
-											res.send({
-                                                status: 200,
-                                                message: "Successfully logged in",
-                                                user: {
-                                                    token: token,
-                                                    id: user.id,
-                                                    first_name: user.first_name,
-                                                    last_name: user.last_name,
-                                                    email: user.email,
-                                                    role: user.role,
-                                                    email_verified: user.email_verified
-                                                }
-                                            });
-										}
-									);
-								} else {
-									res.send({
-										status: 401,
-										message: "Invalid email or password",
-									});
-								}
-								return;
-								}
-							);
-						}
-					);
-				}
-			}
-		}
-	);
+    if (!email || !password) {
+        res.status(400).send({ message: "Missing required fields" });
+        return;
+    }
+
+    db.query("SELECT * FROM users WHERE email = ?", [email], function (error, results) {
+        if (error) {
+            send_error(error, "Error logging in");
+            res.status(500).send({ message: "Error logging in" });
+            return;
+        }
+
+        if (results.length < 1) {
+            res.status(401).send({ message: "Invalid email or password" });
+            return;
+        }
+
+        let user = results[0];
+
+        db.query("SELECT * FROM salts WHERE id = ?", [user.salt], function (error, results) {
+            if (error) {
+                send_error(error, "Error logging in");
+                res.status(500).send({ message: "Error logging in" });
+                return;
+            }
+
+            if (results.length < 1) {
+                res.status(401).send({ message: "Invalid email or password" });
+                return;
+            }
+
+            let salt = results[0].salt;
+
+            crypto.pbkdf2(password, salt, 310000, 32, "sha256", function (err, hashedPassword) {
+                if (err) {
+                    send_error(err, "Error hashing password");
+                    res.status(500).send({ message: "Error hashing password" });
+                    return;
+                }
+
+                if (hashedPassword.toString("hex") === user.password.toString("hex")) {
+                    // Update the token and token expiration date to tomorrow
+                    let new_expire_date = new Date();
+                    new_expire_date.setDate(new_expire_date.getDate() + 1);
+                    new_expire_date = new_expire_date.toISOString().slice(0, 19).replace('T', ' ');
+
+                    // Create a user token
+                    let token = crypto.randomBytes(16).toString("hex");
+
+                    db.query(
+                        "UPDATE users SET token = ?, token_expires_at = ? WHERE id = ?",
+                        [token, new_expire_date, user.id],
+                        function (err) {
+                            if (err) {
+                                send_error(err, "Updating token");
+                                res.status(500).send({ message: "Updating token failed" });
+                                return;
+                            }
+
+                            res.send({
+                                status: 200,
+                                message: "Successfully logged in",
+                                user: {
+                                    token: token,
+                                    id: user.id,
+                                    first_name: user.first_name,
+                                    last_name: user.last_name,
+                                    email: user.email,
+                                    role: user.role,
+                                    email_verified: user.email_verified
+                                }
+                            });
+                        }
+                    );
+                } else {
+                    res.status(401).send({ message: "Invalid email or password" });
+                }
+            });
+        });
+    });
 });
 
 // forgot password 

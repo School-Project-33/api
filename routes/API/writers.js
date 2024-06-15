@@ -1,13 +1,14 @@
 // require the needed modules
 var express = require("express");
 var { send_error } = require("../../functions/error");
-const { check_user_token, check_user_id, get_user_from_token } = require("../../functions/middleware");
+const { check_user_token, check_user_id } = require("../../functions/middleware");
 
 // create the router
 var router = express.Router();
 
-router.get('/', get_user_from_token, async function(req, res, next){
+router.get('/', check_user_token, async function(req, res, next){
     try {
+        console.log(req.user);
         let writers = await query("SELECT * FROM writers");
         // also get the users first and last_name from the users table and add it to the writers object
         for (let i = 0; i < writers.length; i++){
