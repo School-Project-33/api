@@ -7,9 +7,9 @@
 </head>
 <body>
     <h2>API Test Form</h2>
-    <form id="apiForm">
+    <form id="apiForm" onSubmit="sendRequest()">
         <label for="apiURL">API Endpoint:</label><br>
-        <input type="text" id="apiURL" name="apiURL" value="http://localhost:60258/api/v1/"><br>
+        <input type="text" id="apiURL" name="apiURL" value="http://localhost:55614/api/v1/"><br>
         <label for="method">Method:</label><br>
         <input type="text" id="method" name="method" placeholder="post, get, patch, put, delete"><br>
         <label for="apiKey">API Key:</label><br>
@@ -20,7 +20,7 @@
         <input type="file" id="cover_image" name="cover_image"><br>
         <label for="book_image">Upload images:</label><br>
         <input type="file" name="book_image" id="book_image" multiple="multiple"><br><br>
-        <button type="button" onclick="sendRequest()">Send Request</button>
+        <button type="button" >Send Request</button>
     </form>
     <h2>Response:</h2>
     <div id="response"></div>

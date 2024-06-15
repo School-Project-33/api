@@ -106,6 +106,10 @@ router.get("/verify/:email_verify_token", async function (req, res) {
 router.post("/login", function (req, res) {
 	let email = req.body.email;
 	let password = req.body.password;
+	if(!email || !password) {
+		res.send({ status: 400, message: "Missing required fields" });
+		return;
+	}
 
 	db.query(
 		"SELECT * FROM users WHERE email = ?",
