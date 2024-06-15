@@ -644,10 +644,10 @@
 									"type": "number"
 								},
 								"long_desc": {
-									"type": "text"
+									"type": "string"
 								},
 								"short_desc": {
-									"type": "text"
+									"type": "string"
 								},
 								"category_1": {
 									"type": "integer"
@@ -659,6 +659,9 @@
 									"type": "integer"
 								},
 								"category_4": {
+									"type": "integer"
+								},
+								"format": {
 									"type": "integer"
 								},
 								"cover_image": {
