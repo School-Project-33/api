@@ -521,7 +521,7 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
+						"multipart/form-data": {
 							"schema": {
 								"type": "object",
 								"properties": {
@@ -542,14 +542,21 @@
 									},
 									"instagram_url": {
 										"type": "string"
+									},
+									"profile_image": {
+										"type": "string",
+										"format": "binary"
+									},
+									"profile_banner": {
+										"type": "string",
+										"format": "binary"
 									}
 								},
 								"required": [
-									"email",
-									"firstName",
-									"lastName",
-									"seller",
-									"phoneNumber"
+									"public_email",
+									"bio",
+									"profile_image",
+									"profile_banner"
 								]
 							}
 						}
