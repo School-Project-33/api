@@ -43,8 +43,8 @@ router.post('/add', check_user_token, isSeller, upload.fields([
         
         // Check if req.files.book_image exists before mapping
         let bookImagesFilePath = [];
-        if (req.files.book_image) {
-            bookImagesFilePath = req.files.book_image.map(file => file.path.split("/public/")[1] || file.path.split("\\public\\")[1].replace(/\\/g, "/"));
+        if (req.files.book_images) {
+            bookImagesFilePath.push(req.files.book_images.map(file => file.path.split("/public/")[1] || file.path.split("\\public\\")[1].replace(/\\/g, "/")))
         }
         
         res.status(200).json({ status: 200, message: 'success', paths: { cover_image: coverImageFilePath, book_images: bookImagesFilePath } });

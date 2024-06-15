@@ -640,12 +640,30 @@
 								"title": {
 									"type": "string"
 								},
+								"price": {
+									"type": "number"
+								},
+								"long_desc": {
+									"type": "text"
+								},
+								"short_desc": {
+									"type": "text"
+								},
+								"category_1": {
+									"type": "integer"
+								},
+								"category_2": {
+									"type": "integer"
+								},
+								"category_3": {
+									"type": "integer"
+								},
+								"category_4": {
+									"type": "integer"
+								},
 								"cover_image": {
 									"type": "string",
 									"format": "binary"
-								},
-								"price": {
-									"type": "number"
 								},
 								"book_images": {
 							  			"type": "array",
@@ -656,7 +674,7 @@
 							  			"maxItems": 10
 									}
 					  			},
-					  			"required": ["title", "cover_image", "price"]
+					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images"]
 							}
 						}
 					}
