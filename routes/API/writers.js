@@ -49,12 +49,16 @@ router.put('/settings/:id', check_user_token, isSeller, check_writer_id, async f
     try {
         let writer = await query("SELECT * FROM writers WHERE id = ?", [req.params.id]);
         if(writer.length > 0){
-            let newSettings = req.body;
-            let settings = JSON.parse(writer[0].settings);
-            for (let key in newSettings){
-                settings[key] = newSettings[key];
-            };
-            await query("UPDATE writers SET settings = ? WHERE id = ?", [JSON.stringify(settings), req.params.id]);
+            let body = req.body;
+            let public_email = body.public_email;
+            let bio = body.bio;
+            let website_url = body.website_url;
+            let twitter_url = body.twitter_url;
+            let facebook_url = body.facebook_url;
+            let instagram_url = body.instagram_url;
+
+            await query("UPDATE writers SET public_email = ?, bio = ?, website_url = ?, twitter_url = ?, facebook_url = ?, instagram_url = ? WHERE id = ?", [public_email, bio, website_url, twitter_url, facebook_url, instagram_url, req.params.id]);
+            
             res.json({status: 200, message: "Settings updated successfully"});
         } else{
             res.status(404).json({status: 404, message: "Writer not found"});
