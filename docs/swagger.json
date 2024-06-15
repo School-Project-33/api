@@ -570,6 +570,106 @@
 					}
 				}
 			}
+		},
+		"/books": {
+			"get": {
+				"summary": "Get all books",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to get all books",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Books found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"title": {
+												"type": "string"
+											},
+											"cover_image": {
+												"type": "string"
+											},
+											"writer_id": {
+												"type": "integer"
+											},
+											"price": {
+												"type": "number"
+											},
+											"published_at": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/books/add": {
+			"post": {
+			  	"summary": "Add a book",
+			  	"tags": ["Books"],
+			  	"description": "This endpoint is used to add a book",
+			  	"requestBody": {
+				"required": true,
+				"content": {
+				  	"multipart/form-data": {
+						"schema": {
+					  		"type": "object",
+					  		"properties": {
+								"title": {
+									"type": "string"
+								},
+								"cover_image": {
+									"type": "string",
+									"format": "binary"
+								},
+								"price": {
+									"type": "number"
+								},
+								"book_images": {
+							  			"type": "array",
+							  			"items": {
+											"type": "string",
+											"format": "binary"
+							  			},
+							  			"maxItems": 10
+									}
+					  			},
+					  			"required": ["title", "cover_image", "price"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Book added"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
 		}
 	}
 }
