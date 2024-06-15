@@ -508,7 +508,6 @@
 					"Writers"
 				],
 				"description": "This endpoint is used to update a writer's settings",
-				"security": [],
 				"parameters": [
 					{
 						"name": "id",

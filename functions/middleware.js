@@ -47,18 +47,13 @@ async function check_user_id(req, res, next) {
 function check_writer_id(req, res, next) {
     let id = req.params.id;
     let user_id = req.user.id;
-    let seller = req.user.seller;
-    
-    if (!seller) {
-        return res.status(401).send({"status": 401, "message": "Unauthorized"});
-    }
 
     db.query("SELECT user_id FROM writers WHERE id = ?", [id], function(err, result) {
         if (err) {
             return next(err);
         }
         if (result.length > 0) {
-            if (result[0].user_id === user_id || seller === 1) {
+            if (result[0].user_id === user_id) {
                 next();
             } else {
                 res.status(401).send({"status": 401, "message": "Unauthorized"});
@@ -69,22 +64,20 @@ function check_writer_id(req, res, next) {
     });
 }
 
-async function isSeller(){
-	return function(req, res, next){
-		let user_id = req.user.id;
-		db.query("SELECT seller FROM users WHERE id = ?", [user_id], function(err, result){
-			if (err) throw err;
-			if (result.length > 0){
-				if (result[0].seller === 1){
-					next();
-				} else{
-					res.status(401).send({"status": 401, "message": "Unauthorized"});
-				};
+async function isSeller(req, res, next){
+	let user_id = req.user.id;
+	db.query("SELECT seller FROM users WHERE id = ?", [user_id], function(err, result){
+		if (err) throw err;
+		if (result.length > 0){
+			if (result[0].seller === 1){
+				next();
 			} else{
 				res.status(401).send({"status": 401, "message": "Unauthorized"});
 			};
-		});
-	}
+		} else{
+			res.status(401).send({"status": 401, "message": "Unauthorized"});
+		};
+	});
 }
 
 module.exports = {
