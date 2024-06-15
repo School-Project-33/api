@@ -525,20 +525,23 @@
 							"schema": {
 								"type": "object",
 								"properties": {
-									"email": {
+									"public_email": {
 										"type": "string"
 									},
-									"firstname": {
+									"bio": {
 										"type": "string"
 									},
-									"lastname": {
+									"website_url": {
 										"type": "string"
 									},
-									"phonenumber": {
+									"twitter_url": {
 										"type": "string"
 									},
-									"seller": {
-										"type": "boolean"
+									"facebook_url": {
+										"type": "string"
+									},
+									"instagram_url": {
+										"type": "string"
 									}
 								},
 								"required": [
