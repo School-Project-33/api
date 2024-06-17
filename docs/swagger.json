@@ -806,7 +806,7 @@
 							  			"maxItems": 10
 									}
 					  			},
-					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images"]
+					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images", "format"]
 							}
 						}
 					}
