@@ -3,8 +3,9 @@ var createError = require('http-errors');
 var express = require('express');
 var logger = require('morgan');
 var { send_error } = require('./functions/error.js');
-let db = require('./db.js');
+var db = require('./db.js');
 var { query } = require(`./functions/database_queries.js`);
+const cors = require('cors');
 
 // require the routers
 var indexRouter = require('./routes/index');
@@ -27,6 +28,9 @@ app.locals.pluralize = require('pluralize');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(cors());
+app.options('*', cors());
 
 // use the routers
 app.use('/', indexRouter);

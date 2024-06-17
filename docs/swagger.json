@@ -76,12 +76,16 @@
 	],
 	"servers": [
 		{
-			"url": "https://solarhosting.nl:60258/api/v1/",
+			"url": "https://185.192.97.1:55614/api/v1/",
 			"description": "Production server"
 		},
 		{
-			"url": "http://localhost:60258/api/v1/",
+			"url": "http://192.168.1.87:55614/api/v1/",
 			"description": "Development server"
+		},
+		{
+			"url": "http://localhost:55614/api/v1/",
+			"description": "Local server"
 		}
 	],
 	"paths": {
@@ -151,6 +155,60 @@
 				}
 			}
 		},
+		"/users": {
+			"get": {
+				"summary": "Get all users",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to get all users",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Users found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"email": {
+												"type": "string"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"phone_number": {
+												"type": "string"
+											},
+											"seller": {
+												"type": "boolean"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/users/register": {
 			"post": {
 				"summary": "Register a new user",
@@ -203,6 +261,495 @@
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/login": {
+			"post": {
+				"summary": "Login",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to login",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email",
+									"password"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Login successful",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"token": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"401": {
+						"$ref": "#/components/responses/UnauthorizedError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/forgot_password": {
+			"post": {
+				"summary": "Forgot password",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to request a password reset",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Password reset email sent"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/reset_password": {
+			"post": {
+				"summary": "Reset password",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to reset a password",
+				"security": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"password": {
+										"type": "string"
+									},
+									"token": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password",
+									"token"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Password reset"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/writers": {
+			"get": {
+				"summary": "Get all writers",
+				"tags": [
+					"Writers"
+				],
+				"description": "This endpoint is used to get all writers",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Writers found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"profile_image": {
+												"type": "string"
+											},
+											"profile_banner": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"public_email": {
+												"type": "string"
+											},
+											"bio": {
+												"type": "string"
+											},
+											"website_url": {
+												"type": "string"
+											},
+											"twitter_url": {
+												"type": "string"
+											},
+											"facebook_url": {
+												"type": "string"
+											},
+											"instagram_url": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/writers/{id}": {
+			"get": {
+				"summary": "Get a writer",
+				"tags": [
+					"Writers"
+				],
+				"description": "This endpoint is used to get a writer",
+				"security": [],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Writers found",
+						"content": {
+							"application/json": {
+								"schema": { 
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"profile_image": {
+												"type": "string"
+											},
+											"profile_banner": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"public_email": {
+												"type": "string"
+											},
+											"bio": {
+												"type": "string"
+											},
+											"website_url": {
+												"type": "string"
+											},
+											"twitter_url": {
+												"type": "string"
+											},
+											"facebook_url": {
+												"type": "string"
+											},
+											"instagram_url": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/writers/settings/{id}": {
+			"put": {
+				"summary": "Update writer settings",
+				"tags": [
+					"Writers"
+				],
+				"description": "This endpoint is used to update a writer's settings",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"public_email": {
+										"type": "string"
+									},
+									"bio": {
+										"type": "string"
+									},
+									"website_url": {
+										"type": "string"
+									},
+									"twitter_url": {
+										"type": "string"
+									},
+									"facebook_url": {
+										"type": "string"
+									},
+									"instagram_url": {
+										"type": "string"
+									},
+									"profile_image": {
+										"type": "string",
+										"format": "binary"
+									},
+									"profile_banner": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"public_email",
+									"bio",
+									"profile_image",
+									"profile_banner"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Writer settings updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/books": {
+			"get": {
+				"summary": "Get all books",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to get all books",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Books found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"title": {
+												"type": "string"
+											},
+											"cover_image": {
+												"type": "string"
+											},
+											"writer_id": {
+												"type": "integer"
+											},
+											"price": {
+												"type": "number"
+											},
+											"published_at": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/books/add": {
+			"post": {
+			  	"summary": "Add a book",
+			  	"tags": ["Books"],
+			  	"description": "This endpoint is used to add a book",
+			  	"requestBody": {
+				"required": true,
+				"content": {
+				  	"multipart/form-data": {
+						"schema": {
+					  		"type": "object",
+					  		"properties": {
+								"title": {
+									"type": "string"
+								},
+								"price": {
+									"type": "number"
+								},
+								"long_desc": {
+									"type": "string"
+								},
+								"short_desc": {
+									"type": "string"
+								},
+								"category_1": {
+									"type": "integer"
+								},
+								"category_2": {
+									"type": "integer"
+								},
+								"category_3": {
+									"type": "integer"
+								},
+								"category_4": {
+									"type": "integer"
+								},
+								"format": {
+									"type": "integer"
+								},
+								"cover_image": {
+									"type": "string",
+									"format": "binary"
+								},
+								"book_images": {
+							  			"type": "array",
+							  			"items": {
+											"type": "string",
+											"format": "binary"
+							  			},
+							  			"maxItems": 10
+									}
+					  			},
+					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Book added"
 					},
 					"500": {
 						"$ref": "#/components/responses/ServerError"

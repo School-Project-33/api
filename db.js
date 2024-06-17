@@ -68,7 +68,7 @@ db.query("CREATE TABLE IF NOT EXISTS users ( \
 	salt INT NOT NULL, \
 	password_reset_token TEXT, \
 	password_reset_token_expires_at TIMESTAMP, \
-	role INT NOT NULL DEFAULT 6, \
+	role INT NOT NULL DEFAULT 5, \
 	seller BOOLEAN, \
 	scheduled_for_deletion BOOLEAN, \
 	scheduled_for_deletion_at DATE, \
@@ -113,18 +113,21 @@ db.query("SELECT * FROM users", function (err, result) {
 				);
 			});
 		});
-	}
+	} else return;
 });
 
 // create the writers table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, FOREIGN KEY (user_id) REFERENCES users(id)
 db.query("CREATE TABLE IF NOT EXISTS writers ( \
 	id INT AUTO_INCREMENT PRIMARY KEY, \
 	user_id INT NOT NULL, \
-	bio TEXT NOT NULL, \
-	website_url TEXT NOT NULL, \
-	twitter_url TEXT NOT NULL, \
-	facebook_url TEXT NOT NULL, \
-	instagram_url TEXT NOT NULL, \
+	profile_image TEXT, \
+	profile_banner TEXT, \
+	bio TEXT, \
+	public_email TEXT, \
+	website_url TEXT, \
+	twitter_url TEXT, \
+	facebook_url TEXT, \
+	instagram_url TEXT, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
 	FOREIGN KEY (user_id) REFERENCES users(id) \
@@ -208,11 +211,19 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	long_desc TEXT NOT NULL, \
 	short_desc TEXT NOT NULL, \
 	price DECIMAL(10, 2) NOT NULL, \
-	categories TEXT NOT NULL, \
+	category_1 INT NOT NULL, \
+	category_2 INT, \
+	category_3 INT, \
+	category_4 INT, \
 	format INT NOT NULL, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
-	FOREIGN KEY (author) REFERENCES writers(id) \
+	FOREIGN KEY (author) REFERENCES writers(id), \
+	FOREIGN KEY (category_1) REFERENCES categories(id), \
+	FOREIGN KEY (category_2) REFERENCES categories(id), \
+	FOREIGN KEY (category_3) REFERENCES categories(id), \
+	FOREIGN KEY (category_4) REFERENCES categories(id), \
+	FOREIGN KEY (format) REFERENCES formats(id) \
 )", function (err, result) {
 	if (err) throw err;
 	if(result.changedRows > 0){

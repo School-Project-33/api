@@ -97,10 +97,15 @@ process.stdin.on('data', async function (text) {
   } else if(text == 'o'|| text == 'open'){
     var opn = require('opn');
     opn('http://localhost:'+port);
+  } else if(text == 'odb -s'|| text == 'odb --show'){
+    var opn = require('opn');
+    console.log('Database login info: \nUsername: '+`${chalk.cyan(config.db.username)}`+"\nPassword: "+ `${chalk.redBright(config.db.password)}`)
     setTimeout(function(){
       opn('https://database.discordbothosting.com')
-      console.log('Database login info: \nUsername: '+`${chalk.cyan(config.db.username)}`+"\nPassword: "+ `${chalk.redBright(config.db.password)}`)
     }, 1000);
+  } else if (text === 'odb' || text == 'open db') {
+    var opn = require('opn');
+    opn('https://database.discordbothosting.com')
   }
   else {
     console.log('Unknown command. Type "help" for a list of commands.\n');

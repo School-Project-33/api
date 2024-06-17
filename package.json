@@ -20,9 +20,11 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "chalk": "^5.3.0",
+    "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "experss": "^0.0.1-security",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.13",
