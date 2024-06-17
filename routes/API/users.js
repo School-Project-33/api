@@ -261,4 +261,14 @@ router.get("/", async function (req, res) {
 	res.send({ status: 200, amount: total_users, users: users });
 });
 
+// get a user by id
+router.get("/:id", async function (req, res) {
+    let user = await query("SELECT id,first_name,last_name,email,email_verified,phone_number,role,seller,scheduled_for_deletion,scheduled_for_deletion_at,account_disabled,created_at,updated_at FROM users WHERE id =?", [req.params.id]);
+    if(user.length < 1) {
+        res.send({ status: 400, message: "User not found", user: null });
+        return;
+    }
+    res.send({ status: 200, user: user[0] });
+});
+
 module.exports = router;
