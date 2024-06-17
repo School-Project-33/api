@@ -61,6 +61,7 @@ db.query("CREATE TABLE IF NOT EXISTS users ( \
 	email TEXT NOT NULL, \
 	email_verified BOOLEAN, \
 	email_verify_token TEXT, \
+	email_change_token TEXT, \
 	phone_number TEXT, \
 	token BLOB, \
 	token_expires_at TIMESTAMP, \
