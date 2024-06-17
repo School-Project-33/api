@@ -76,11 +76,11 @@
 	],
 	"servers": [
 		{
-			"url": "https://solarhosting.nl:60258/api/v1/",
+			"url": "https://185.192.97.1:55614/api/v1/",
 			"description": "Production server"
 		},
 		{
-			"url": "http://localhost:60258/api/v1/",
+			"url": "http://localhost:55614/api/v1/",
 			"description": "Development server"
 		}
 	],
@@ -508,7 +508,6 @@
 					"Writers"
 				],
 				"description": "This endpoint is used to update a writer's settings",
-				"security": [],
 				"parameters": [
 					{
 						"name": "id",
@@ -522,32 +521,42 @@
 				"requestBody": {
 					"required": true,
 					"content": {
-						"application/json": {
+						"multipart/form-data": {
 							"schema": {
 								"type": "object",
 								"properties": {
-									"email": {
+									"public_email": {
 										"type": "string"
 									},
-									"firstname": {
+									"bio": {
 										"type": "string"
 									},
-									"lastname": {
+									"website_url": {
 										"type": "string"
 									},
-									"phonenumber": {
+									"twitter_url": {
 										"type": "string"
 									},
-									"seller": {
-										"type": "boolean"
+									"facebook_url": {
+										"type": "string"
+									},
+									"instagram_url": {
+										"type": "string"
+									},
+									"profile_image": {
+										"type": "string",
+										"format": "binary"
+									},
+									"profile_banner": {
+										"type": "string",
+										"format": "binary"
 									}
 								},
 								"required": [
-									"email",
-									"firstName",
-									"lastName",
-									"seller",
-									"phoneNumber"
+									"public_email",
+									"bio",
+									"profile_image",
+									"profile_banner"
 								]
 							}
 						}
@@ -562,6 +571,127 @@
 					},
 					"404": {
 						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/books": {
+			"get": {
+				"summary": "Get all books",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to get all books",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Books found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"title": {
+												"type": "string"
+											},
+											"cover_image": {
+												"type": "string"
+											},
+											"writer_id": {
+												"type": "integer"
+											},
+											"price": {
+												"type": "number"
+											},
+											"published_at": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/books/add": {
+			"post": {
+			  	"summary": "Add a book",
+			  	"tags": ["Books"],
+			  	"description": "This endpoint is used to add a book",
+			  	"requestBody": {
+				"required": true,
+				"content": {
+				  	"multipart/form-data": {
+						"schema": {
+					  		"type": "object",
+					  		"properties": {
+								"title": {
+									"type": "string"
+								},
+								"price": {
+									"type": "number"
+								},
+								"long_desc": {
+									"type": "string"
+								},
+								"short_desc": {
+									"type": "string"
+								},
+								"category_1": {
+									"type": "integer"
+								},
+								"category_2": {
+									"type": "integer"
+								},
+								"category_3": {
+									"type": "integer"
+								},
+								"category_4": {
+									"type": "integer"
+								},
+								"format": {
+									"type": "integer"
+								},
+								"cover_image": {
+									"type": "string",
+									"format": "binary"
+								},
+								"book_images": {
+							  			"type": "array",
+							  			"items": {
+											"type": "string",
+											"format": "binary"
+							  			},
+							  			"maxItems": 10
+									}
+					  			},
+					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Book added"
 					},
 					"500": {
 						"$ref": "#/components/responses/ServerError"

@@ -218,7 +218,12 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	format INT NOT NULL, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
-	FOREIGN KEY (author) REFERENCES writers(id) \
+	FOREIGN KEY (author) REFERENCES writers(id), \
+	FOREIGN KEY (category_1) REFERENCES categories(id), \
+	FOREIGN KEY (category_2) REFERENCES categories(id), \
+	FOREIGN KEY (category_3) REFERENCES categories(id), \
+	FOREIGN KEY (category_4) REFERENCES categories(id), \
+	FOREIGN KEY (format) REFERENCES formats(id) \
 )", function (err, result) {
 	if (err) throw err;
 	if(result.changedRows > 0){

@@ -1,12 +1,28 @@
 // require the needed modules
 var express = require("express");
 var { send_error } = require("../../functions/error");
-const { check_user_token, check_user_id, get_user_from_token } = require("../../functions/middleware");
+var multer = require("multer");
+var path = require("path");
+var fs = require("fs");
+const { check_user_token, check_user_id, check_writer_id, isSeller } = require("../../functions/middleware");
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '../../public/images/uploads/'+req.user.first_name);
+        fs.mkdirSync(uploadPath, { recursive: true }); // Ensure the uploads directory exists
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + path.extname(file.originalname)); // Append current timestamp to the file name
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // create the router
 var router = express.Router();
 
-router.get('/', get_user_from_token, async function(req, res, next){
+router.get('/', async function(req, res, next){
     try {
         let writers = await query("SELECT * FROM writers");
         // also get the users first and last_name from the users table and add it to the writers object
@@ -45,16 +61,34 @@ router.get('/:id', async function(req, res, next){
 });
 
 // create the settings route
-router.post('/settings/:id', check_user_token, check_user_id, async function(req, res, next){
+router.put('/settings/:id', check_user_token, isSeller, check_writer_id, upload.fields([
+    { name: 'profile_image', maxCount: 1 },
+    { name: 'profile_banner', maxCount: 1 }
+]), async function(req, res, next){
     try {
         let writer = await query("SELECT * FROM writers WHERE id = ?", [req.params.id]);
         if(writer.length > 0){
-            let newSettings = req.body;
-            let settings = JSON.parse(writer[0].settings);
-            for (let key in newSettings){
-                settings[key] = newSettings[key];
-            };
-            await query("UPDATE writers SET settings = ? WHERE id = ?", [JSON.stringify(settings), req.params.id]);
+            let body = req.body;
+            let public_email = body.public_email;
+            let bio = body.bio;
+            let website_url = body.website_url;
+            let twitter_url = body.twitter_url;
+            let facebook_url = body.facebook_url;
+            let instagram_url = body.instagram_url;
+
+            if(website_url == null || website_url == "") website_url = null;
+            if(twitter_url == null || twitter_url == "") twitter_url = null;
+            if(facebook_url == null || facebook_url == "") facebook_url = null;
+            if(instagram_url == null || instagram_url == "") instagram_url = null;
+
+            let profileImageFilePath = req.files.profile_image[0].path.split("/public/")[1] || req.files.profile_image[0].path.split("\\public\\")[1].replace(/\\/g, "/");
+            let ProfileBannerFilePath = req.files.profile_banner[0].path.split("/public/")[1] || req.files.profile_banner[0].path.split("\\public\\")[1].replace(/\\/g, "/");
+
+            profileImageFilePath = "http://185.192.97.1:55614/" + profileImageFilePath;
+            ProfileBannerFilePath = "http://185.192.97.1:55614/" + ProfileBannerFilePath;
+
+            await query("UPDATE writers SET profile_image =?, profile_banner =?, public_email = ?, bio = ?, website_url = ?, twitter_url = ?, facebook_url = ?, instagram_url = ? WHERE id = ?", [profileImageFilePath, ProfileBannerFilePath, public_email, bio, website_url, twitter_url, facebook_url, instagram_url, req.params.id]);
+            
             res.json({status: 200, message: "Settings updated successfully"});
         } else{
             res.status(404).json({status: 404, message: "Writer not found"});
