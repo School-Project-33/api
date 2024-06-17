@@ -80,8 +80,12 @@
 			"description": "Production server"
 		},
 		{
-			"url": "http://localhost:55614/api/v1/",
+			"url": "http://192.168.1.87:55614/api/v1/",
 			"description": "Development server"
+		},
+		{
+			"url": "http://localhost:55614/api/v1/",
+			"description": "Local server"
 		}
 	],
 	"paths": {
@@ -144,6 +148,60 @@
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users": {
+			"get": {
+				"summary": "Get all users",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to get all users",
+				"security": [],
+				"responses": {
+					"200": {
+						"description": "Users found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"email": {
+												"type": "string"
+											},
+											"first_name": {
+												"type": "string"
+											},
+											"last_name": {
+												"type": "string"
+											},
+											"phone_number": {
+												"type": "string"
+											},
+											"seller": {
+												"type": "boolean"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
 					},
 					"500": {
 						"$ref": "#/components/responses/ServerError"
