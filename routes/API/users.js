@@ -256,7 +256,9 @@ router.post("/reset_password", async function (req, res) {
 // get all users
 router.get("/", async function (req, res) {
 	let users = await query("SELECT id,first_name,last_name,email,email_verified,phone_number,role,seller,scheduled_for_deletion,scheduled_for_deletion_at,account_disabled,created_at,updated_at FROM users");
-	res.send({ status: 200, users: users });
+	let total_users_query = await query("SELECT COUNT(*) as total_users FROM users");
+	let total_users = total_users_query[0].total_users;
+	res.send({ status: 200, amount: total_users, users: users });
 });
 
 module.exports = router;

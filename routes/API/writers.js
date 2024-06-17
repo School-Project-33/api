@@ -25,6 +25,8 @@ var router = express.Router();
 router.get('/', async function(req, res, next){
     try {
         let writers = await query("SELECT * FROM writers");
+        let total_writers_query = await query("SELECT COUNT(*) as total_writers FROM writers");
+        let total_writers = total_writers_query[0].total_writers;
         // also get the users first and last_name from the users table and add it to the writers object
         for (let i = 0; i < writers.length; i++){
             let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [writers[i].user_id]);
@@ -32,7 +34,7 @@ router.get('/', async function(req, res, next){
             writers[i].last_name = user[0].last_name;
         }
         if(writers.length > 0){
-            await res.json({status: 200, message: "Success!", writers: writers});
+            await res.json({status: 200, message: "Success!", amount: total_writers, writers: writers});
         } else{
             res.status(404).json({status: 404, message: "Writers not found", writers: []});
         };

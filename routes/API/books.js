@@ -25,7 +25,9 @@ var router = express.Router();
 router.get("/", async function (req, res) {
     try {
         let books = await query("SELECT * FROM books");
-        res.json({ books: books });
+        let total_books_query = await query("SELECT COUNT(*) as total_books FROM books");
+	    let total_books = total_books_query[0].total_books;
+        res.json({ status: 200, message: "Successfully got all books", amount: total_books, books: books });
     } catch (err) {
         send_error(err, res);
     }
