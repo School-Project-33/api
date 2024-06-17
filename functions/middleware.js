@@ -37,7 +37,7 @@ async function check_user_token(req, res, next) {
 
 async function check_user_id(req, res, next) {
 	let user_id = req.params.id;
-	if (req.user.id === user_id) {
+	if (req.user.id == user_id) {
 		next();
 	} else {
 		res.status(401).send({"status": 401, "message": "Unauthorized"});
