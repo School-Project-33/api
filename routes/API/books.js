@@ -5,15 +5,41 @@ var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
 var { check_user_token, isSeller } = require("../../functions/middleware");
+const cors = require('cors');
+
+async function sanitizeFilename(filename) {
+    if (!filename) {
+        return filename; // Provide a default filename or handle as per your application logic
+    }
+    // Replace disallowed characters with underscores
+    return filename.replace(/[^\w\s.\-:<>'"/\\|?* ]/g, '_');
+}
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '../../public/images/uploads/'+req.user.first_name+"/"+req.body.title);
-        fs.mkdirSync(uploadPath, { recursive: true }); // Ensure the uploads directory exists
-        cb(null, uploadPath);
+    destination: async (req, file, cb) => {
+        try {
+            let sanitizedTitle = await sanitizeFilename(req.body.title);
+            let sanitizedAuthorFirstName = await sanitizeFilename(req.user.first_name);
+            let sanitizedAuthorLastName = await sanitizeFilename(req.user.last_name);
+
+            if(!req.body.title || !req.user.first_name || !req.user.last_name) {
+                return cb(new Error('Missing required fields'));
+            }
+            
+            // Ensure sanitized variables are defined
+            sanitizedTitle = sanitizedTitle;
+            sanitizedAuthorFirstName = sanitizedAuthorFirstName;
+            sanitizedAuthorLastName = sanitizedAuthorLastName;
+
+            const uploadPath = path.join(__dirname, '../../public/images/uploads', sanitizedAuthorFirstName, sanitizedAuthorLastName, sanitizedTitle);
+            fs.mkdirSync(uploadPath, { recursive: true }); // Ensure the uploads directory exists
+            cb(null, uploadPath);
+        } catch (err) {
+            cb(err);
+        }
     },
     filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname)); // Append current timestamp to the file name
+        cb(null, file.fieldname+ Date.now() + path.extname(file.originalname)); // Append current timestamp to the file name
     }
 });
 
@@ -21,6 +47,9 @@ const upload = multer({ storage: storage });
 
 // create the router
 var router = express.Router();
+
+router.use(cors());
+router.options('*', cors());
 
 router.get("/", async function (req, res) {
     try {
@@ -39,8 +68,6 @@ router.post('/add', check_user_token, isSeller, upload.fields([
     { name: 'book_images', maxCount: 10 }
 ]), async function (req, res) {
     try {
-        console.log(req.body);
-        
         let coverImageFilePath = req.files.cover_image[0].path.split("/public/")[1] || req.files.cover_image[0].path.split("\\public\\")[1].replace(/\\/g, "/");
         
         // Check if req.files.book_image exists before mapping
@@ -61,7 +88,6 @@ router.post('/add', check_user_token, isSeller, upload.fields([
         let category3 = req.body.category_3;
         let category4 = req.body.category_4;
         let format = req.body.format;
-        console.log(format)
 
         if(!title || !author || !lDescription || !sDescription || !price || !category1 || !coverImageFilePath || !bookImagesFilePath || !format){
             let missing = [];
@@ -91,6 +117,22 @@ router.post('/add', check_user_token, isSeller, upload.fields([
     } catch (e) {
         console.error('Error:', e);
         res.status(500).json({ status: 500, message: 'Internal Server Error' });
+    }
+});
+
+router.get("/:writer_id/:book_title", async function (req, res) {
+    try {
+        let author = await query("SELECT * FROM writers WHERE id =?", [req.params.writer_id]);
+        if(author.length < 1) return res.status(404).json({ status: 404, message: "Author not found", book: [] });
+        // find the book with the title and the author
+        let book = await query("SELECT * FROM books WHERE title = ? AND author = ?", [req.params.book_title, author[0].id]);
+        if (book.length > 0) {
+            res.json({ status: 200, message: "Success!", book: book[0] });
+        } else {
+            res.status(404).json({ status: 404, message: "Book not found", book: [] });
+        }
+    } catch (err) {
+        send_error(err, res);
     }
 });
 

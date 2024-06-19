@@ -209,6 +209,70 @@
 				}
 			}
 		},
+		"/users/{id}":{
+			"get": {
+				"summary": "Get a user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to get a user",
+				"security": [],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"email": {
+											"type": "string"
+										},
+										"first_name": {
+											"type": "string"
+										},
+										"last_name": {
+											"type": "string"
+										},
+										"phone_number": {
+											"type": "string"
+										},
+										"seller": {
+											"type": "boolean"
+										},
+										"created_at": {
+											"type": "string"
+										},
+										"updated_at": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/users/register": {
 			"post": {
 				"summary": "Register a new user",
@@ -742,7 +806,7 @@
 							  			"maxItems": 10
 									}
 					  			},
-					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images"]
+					  			"required": ["title", "cover_image", "price", "long_desc", "short_desc", "category_1", "book_images", "format"]
 							}
 						}
 					}

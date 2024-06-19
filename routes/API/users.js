@@ -4,11 +4,17 @@ var crypto = require("crypto");
 var { newUser, forgot_password } = require("../../functions/email");
 var { send_error } = require("../../functions/error");
 var {
-  check_user_token
+  check_user_token,
+  check_user_id
 } = require("../../functions/middleware");
+var { send_mail } = require("../../functions/email");
+const cors = require('cors');
 
 // create the router
 var router = express.Router();
+
+router.use(cors());
+router.options('*', cors());
 
 router.post("/register", async function (req, res) {
 	let first_name = req.body.firstname;
@@ -259,6 +265,69 @@ router.get("/", async function (req, res) {
 	let total_users_query = await query("SELECT COUNT(*) as total_users FROM users");
 	let total_users = total_users_query[0].total_users;
 	res.send({ status: 200, amount: total_users, users: users });
+});
+
+// get a user by id
+router.get("/:id", async function (req, res) {
+    let user = await query("SELECT id,first_name,last_name,email,email_verified,phone_number,role,seller,scheduled_for_deletion,scheduled_for_deletion_at,account_disabled,created_at,updated_at FROM users WHERE id =?", [req.params.id]);
+    if(user.length < 1) {
+        res.send({ status: 400, message: "User not found", user: null });
+        return;
+    }
+    res.send({ status: 200, user: user[0] });
+});
+
+// change the user name
+router.put("/settings/:id/name", check_user_token, check_user_id, async function (req, res, next) {
+	let user = await query("SELECT * FROM users WHERE id =?", [req.params.id]);
+    if(user.length < 1) {
+        res.send({ status: 400, message: "User not found" });
+        return;
+    }
+    if(req.body.first_name) {
+        await query("UPDATE users SET first_name =? WHERE id =?", [req.body.first_name, req.params.id]);
+    }
+    if(req.body.last_name) {
+        await query("UPDATE users SET last_name =? WHERE id =?", [req.body.last_name, req.params.id]);
+    }
+
+	if(!req.body.first_name && !req.body.last_name) return res.send({ status: 400, message: "Missing required fields", user: null });
+
+	if(req.body.first_name || req.body.last_name) {
+		let first_name = req.body.first_name || req.user.first_name;
+		let last_name = req.body.last_name || req.user.last_name;
+		req.user.first_name = first_name;
+		req.user.last_name = last_name;
+		return res.send({ status: 200, message: "Successfully changed name to: '" + first_name + " " + last_name + "'"});
+	}
+});
+
+// change the email
+router.put("/settings/:id/email", check_user_token, check_user_id, async function (req, res, next) {
+	let user = await query("SELECT * FROM users WHERE id =?", [req.params.id]);
+    if(user.length < 1) {
+        res.send({ status: 400, message: "User not found" });
+        return;
+    }
+	
+	// check if the email is already in the database
+	let email = await query("SELECT * FROM users WHERE email =?", [req.body.email]);
+    if(email.length > 0) {
+        res.send({ status: 400, message: "Email is already in use" });
+        return;
+    }
+
+	// generate a change email token
+	let token = crypto.randomBytes(16).toString("hex");
+	await query("UPDATE users SET email_change_token =?, new_email_address=? WHERE id =?", [token, req.body.new_email, req.params.id]);
+	// send an email to the old email and new email
+	
+	// send email to old email:
+	await send_mail(user[0].email, `Beste heer/mevrouw ${await req.user.last_name},\n\nWe hebben een verzoek ontvangen om het e-mailadres dat aan uw account is gekoppeld te wijzigen. Om de veiligheid van uw account te waarborgen, willen we bevestigen dat u degene bent die deze wijziging heeft aangevraagd.\n\nUw huidige E-mail adres: ${req.user.email}\nNieuwe E-mail adres: ${req.body.new_email}\nDatum van aanvraag: ${Date()}\n\nAls u dit verzoek heeft gedaan, klik dan op de onderstaande link om de wijziging te bevestigen:\nhttp://185.192.97.1:55614/api/v1/users/change_email/${token}\n\nAls u geen verzoek heeft gedaan om uw e-mailadres te wijzigen, neem dan onmiddellijk contact met ons op via info.e.schrijvers@wolfsoft.solutions. We raden u ook aan om uw wachtwoord direct te wijzigen om de veiligheid van uw account te waarborgen.\n\nWe nemen de veiligheid van uw account zeer serieus en willen u bedanken voor uw medewerking.`, "Email wijziging");
+	
+	// send email to new email:
+	await send_mail(req.body.new_email, "Dit is een test bericht.", "Email wijziging");
+	res.send({ status: 200, message: "Sent an email to both old and new email addresses" });
 });
 
 module.exports = router;

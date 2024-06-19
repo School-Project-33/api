@@ -5,6 +5,7 @@ var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
 const { check_user_token, check_user_id, check_writer_id, isSeller } = require("../../functions/middleware");
+const cors = require('cors');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -21,6 +22,9 @@ const upload = multer({ storage: storage });
 
 // create the router
 var router = express.Router();
+
+router.use(cors());
+router.options('*', cors());
 
 router.get('/', async function(req, res, next){
     try {
