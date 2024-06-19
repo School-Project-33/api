@@ -4,8 +4,8 @@ var { send_error } = require("../../functions/error");
 var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
-const { check_user_token, check_user_id, check_writer_id, isSeller } = require("../../functions/middleware");
-const cors = require('cors');
+var { check_user_token, check_user_id, check_writer_id, isSeller } = require("../../functions/middleware");
+var cors = require('cors');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
