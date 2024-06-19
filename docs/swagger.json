@@ -162,7 +162,6 @@
 					"Users"
 				],
 				"description": "This endpoint is used to get all users",
-				"security": [],
 				"responses": {
 					"200": {
 						"description": "Users found",
@@ -216,7 +215,6 @@
 					"Users"
 				],
 				"description": "This endpoint is used to get a user",
-				"security": [],
 				"parameters": [
 					{
 						"name": "id",
@@ -465,6 +463,112 @@
 				"responses": {
 					"200": {
 						"description": "Password reset"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/email": {
+			"put": {
+				"summary": "Update email",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to update a user's email",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Email updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/name": {
+			"put": {
+				"summary": "Update name",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to update a user's name",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"first_name": {
+										"type": "string"
+									},
+									"last_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"first_name",
+									"last_name"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Name updated"
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequestError"
@@ -910,6 +1014,24 @@
 						}
 					}
 				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"reason"
+								]
+							}
+						}
+					}
+				},
 				"responses": {
 					"200": {
 						"description": "Book updated"
