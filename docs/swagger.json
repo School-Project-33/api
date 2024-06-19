@@ -582,6 +582,105 @@
 				}
 			}
 		},
+		"/users/settings/{id}/disable": {
+			"put": {
+				"summary": "Disable user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to disable a user (Only works for admin users)",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User disabled successfully"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/enable": {
+			"put": {
+				"summary": "Enable user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to enable a user (Only works for admin users)",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User enabled successfully"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/delete": {
+			"delete": {
+				"summary": "Delete user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to delete a user",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User deletion scheduled successfully"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/writers": {
 			"get": {
 				"summary": "Get all writers",
