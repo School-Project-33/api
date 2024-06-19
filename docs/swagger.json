@@ -1146,6 +1146,331 @@
 					}
 				}
 			}
+		},
+		"/orders": {
+			"get": {
+				"summary": "Get all orders",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get all orders",
+				"responses": {
+					"200": {
+						"description": "Orders found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"book_id": {
+												"type": "integer"
+											},
+											"status": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/order/{userId}/{orderId}": {
+			"get": {
+				"summary": "Get an order",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get an order",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "orderId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Order found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"user_id": {
+											"type": "integer"
+										},
+										"book_id": {
+											"type": "integer"
+										},
+										"status": {
+											"type": "string"
+										},
+										"created_at": {
+											"type": "string"
+										},
+										"updated_at": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/ordered_by/{userId}": {
+			"get": {
+				"summary": "Get orders by user",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get orders by user",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Orders found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"book_id": {
+												"type": "integer"
+											},
+											"status": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/ordered_book/{bookId}": {
+			"get": {
+				"summary": "Get orders by book",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get orders by book",
+				"parameters": [
+					{
+						"name": "bookId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Orders found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"book_id": {
+												"type": "integer"
+											},
+											"status": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/new": {
+			"post": {
+				"summary": "Add a new order",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to add a new order",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"quantity": {
+										"type": "integer"
+									},
+									"book_id": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"quantity",
+									"book_id"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Order added"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/update/{orderId}": {
+			"put": {
+				"summary": "Update an order",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to update an order",
+				"parameters": [
+					{
+						"name": "orderId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"status": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"status"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Order updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
 		}
 	}
 }
