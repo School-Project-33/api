@@ -150,8 +150,31 @@ router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req,
     try {
         let book = await query("SELECT * FROM books WHERE id = ?", [req.params.id]);
         if (book.length < 1) return res.status(404).json({ status: 404, message: "Book not found" });
-        await query("DELETE FROM books WHERE id = ?", [req.params.id]);
-        res.json({ status: 200, message: "Book deleted" });
+        db.query("DELETE FROM books WHERE id = ?", [req.params.id], function (err, result) {
+            if (err) {
+                send_error(err, res);
+            }
+            // remove the images from the server
+            let cover_image = book[0].cover_image;
+            console.log(cover_image);
+
+            // Get everything after the 3rd "/"
+            let cover_image_parts = cover_image.split("/");
+            console.log(cover_image_parts[2]);
+
+            // Join parts after the 3rd "/" excluding the last part (the filename)
+            let cover_image_path = cover_image_parts.slice(3, cover_image_parts.length - 1).join("/");
+            console.log(cover_image_path);
+
+            // Construct the full path
+            cover_image_path = path.join(__dirname, "../../public/", cover_image_path);
+            console.log(cover_image_path);
+            
+            // Remove the directory
+            fs.rmdirSync(cover_image_path, { recursive: true });
+
+            res.json({ status: 200, message: "Book deleted" });
+        });
     } catch (err) {
         send_error(err, res);
     }
