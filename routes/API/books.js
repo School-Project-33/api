@@ -5,6 +5,7 @@ var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
 var { check_user_token, isSeller } = require("../../functions/middleware");
+const cors = require('cors');
 
 async function sanitizeFilename(filename) {
     if (!filename) {
@@ -46,6 +47,9 @@ const upload = multer({ storage: storage });
 
 // create the router
 var router = express.Router();
+
+router.use(cors());
+router.options('*', cors());
 
 router.get("/", async function (req, res) {
     try {

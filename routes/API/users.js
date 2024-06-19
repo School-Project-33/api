@@ -8,9 +8,13 @@ var {
   check_user_id
 } = require("../../functions/middleware");
 var { send_mail } = require("../../functions/email");
+const cors = require('cors');
 
 // create the router
 var router = express.Router();
+
+router.use(cors());
+router.options('*', cors());
 
 router.post("/register", async function (req, res) {
 	let first_name = req.body.firstname;
