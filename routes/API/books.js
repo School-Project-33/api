@@ -157,10 +157,10 @@ router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req,
             // Remove the directory
             try {
                 // check if the directory exists
-                if (!fs.existsSync(cover_image_path)) {
-                    return console.log("Directory doesn't exist")
+                if (fs.existsSync(cover_image_path)) {
+                    fs.rmdirSync(cover_image_path, { recursive: true });
                 }
-                fs.rmdirSync(cover_image_path, { recursive: true });
+                console.log("Directory doesn't exist")
             } catch (e) {
                 send_error(e, "Removing book + directory", res);
                 console.error("Error removing directory:", e);
