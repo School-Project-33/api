@@ -3,10 +3,7 @@ var express = require("express");
 var crypto = require("crypto");
 var { newUser, forgot_password } = require("../../functions/email");
 var { send_error } = require("../../functions/error");
-var {
-  check_user_token,
-  check_user_id
-} = require("../../functions/middleware");
+var { check_user_token, check_user_id, isAdmin } = require("../../functions/middleware");
 var { send_mail } = require("../../functions/email");
 var cors = require('cors');
 var { disable_account, enable_account } = require("../../functions/user_functions");
@@ -159,7 +156,7 @@ router.post("/login", function (req, res) {
                     let new_expire_date = new Date();
                     new_expire_date.setDate(new_expire_date.getDate() + 1);
                     new_expire_date = new_expire_date.toISOString().slice(0, 19).replace('T', ' ');
-					
+
 					if(user.scheduled_for_deletion === 1 && user.account_disabled === 1 && user.scheduled_for_deletion_at !== null) {
 						let email = user.email;
 						let text = 'Geachte heer/mevrouw '+ user.last_name +',\n\nUw account is weer ingeschakeld. Als u dit niet heeft gedaan, wijzig dan uw inloggegevens.';
@@ -340,14 +337,27 @@ router.put("/settings/:id/email", check_user_token, check_user_id, async functio
 });
 
 // The user disabled route
-router.put("/settings/:id/delete", check_user_token, check_user_id, async function (req, res, next) {
+router.delete("/settings/:id/delete", check_user_token, check_user_id, async function (req, res, next) {
 	await disable_account(req.params.id, false);
 	res.send({ status: 200, message: "Successfully disabled account" });
 });
 
+// The user disabled by admin route
+router.put("/settings/:id/disable", check_user_token, isAdmin, async function (req, res, next) {if(req.user.id == req.params.id){
+	res.send({ status: 400, message: "You can't disable your own account" });
+	return;
+}
+	await disable_account(req.params.id, true);
+	res.send({ status: 200, message: "Successfully disabled account by force." });
+});
+
 // The user enable route
-router.put("/settings/:id/not_delete", check_user_token, check_user_id, async function (req, res, next) {
-	await enable_account(req.params.id, false);
+router.put("/settings/:id/enable", check_user_token, isAdmin, async function (req, res, next) {
+	if(req.user.id == req.params.id){
+		res.send({ status: 400, message: "You can't enable your own account" });
+		return;
+	}
+	await enable_account(req.params.id, true);
 	res.send({ status: 200, message: "Successfully enabled account" });
 });
 
