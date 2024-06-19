@@ -71,11 +71,31 @@ async function contact_mail(email, subject, message) {
             throw err;
         };
     });
+};
+
+async function order_email(email, book_id, order_id, res, req){
+    let book = await query('SELECT * FROM books WHERE id = ?', [book_id]);
+    if(book.length < 1) return res.status(404).send({ "status": 404, "message": "No book found" });
+    let order = await query('SELECT * FROM orders WHERE order_id = ? AND book_id =?', [order_id, book_id]);
+    if(order.length < 1) return res.status(404).send({ "status": 404, "message": "No order found" });
+    let writer = await query('SELECT * FROM writers WHERE id = ?', [book[0].author]);
+    if(writer.length < 1) return res.status(404).send({ "status": 404, "message": "No writer found" });
+    let writerUser = await query('SELECT * FROM users WHERE id = ?', [writer[0].user_id]);
+    if(writerUser.length < 1) return res.status(404).send({ "status": 404, "message": "No user found" });
+
+    let orderUser = await query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    if(orderUser.length < 1) return res.status(404).send({ "status": 404, "message": "No user found" });
+
+    let subject = 'Order bevestiging';
+    let text = 'Geachte heer/mevrouw'+ orderUser[0].last_name +',\n\nU heeft een order geplaatst voor het boek: '+ book[0].title +'\nDe schrijver van dit boek is: '+ writerUser[0].first_name+ " "+ writerUser[0].last_name +'\nUw order ID is: #'+ order[0].order_id +'\nUw order status is: '+ order[0].order_status +'\n\nBedankt voor uw bestelling.';
+    
+    send_mail(email, text, subject);
 }
 
 module.exports = {
     newUser,
     forgot_password,
     send_mail,
-    contact_mail
+    contact_mail,
+    order_email,
 };
