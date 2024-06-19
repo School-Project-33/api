@@ -270,6 +270,7 @@ db.query("CREATE TABLE IF NOT EXISTS orders ( \
 	user_id INT NOT NULL, \
 	book_id INT NOT NULL, \
 	order_id INT NOT NULL, \
+	quantity INT NOT NULL, \
 	order_status INT NOT NULL, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
