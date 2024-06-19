@@ -37,7 +37,7 @@ async function check_user_token(req, res, next) {
 
 async function check_user_id(req, res, next) {
 	let user_id = req.params.id;
-	if (req.user.id == user_id) {
+	if (req.user.id == user_id || req.user.role == 1) {
 		next();
 	} else {
 		res.status(401).send({"status": 401, "message": "Unauthorized"});
@@ -80,9 +80,20 @@ async function isSeller(req, res, next){
 	});
 }
 
+async function isAdmin(req, res, next){
+    let user_id = req.user.id;
+    let user = await query("SELECT role FROM users WHERE id = ?", [user_id]);
+    if (user[0].role == 1){
+        next();
+    } else{
+        res.status(401).send({"status": 401, "message": "Unauthorized"});
+    };
+}
+
 module.exports = {
 	check_user_token,
 	check_user_id,
 	isSeller,
 	check_writer_id,
+    isAdmin,
 };

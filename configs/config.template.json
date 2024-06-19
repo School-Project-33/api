@@ -6,7 +6,8 @@
         "password": ""
     },
     "server": {
-        "port": 3000
+        "port": 55614,
+        "ip": ""
     },
     "webhook_url": "",
     "email_server": {

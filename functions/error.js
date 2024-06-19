@@ -11,15 +11,19 @@ async function send_error(error, errorAt, res){
         body: JSON.stringify({username: errorAt, content: text})
     });
     console.error(error);
-    const errorDetails = {
-        message: error.message,
-        stack: error.stack,
-    };
-    res.status(500).json({
-        status: 500,
-        message: 'Internal Server Error',
-        error: errorDetails
-    });
+    if(res){
+        const errorDetails = {
+            message: error.message,
+            stack: error.stack,
+        };
+        res.status(500).json({
+            status: 500,
+            message: 'Internal Server Error',
+            error: errorDetails
+        });
+    } else {
+        console.error('No response object provided');
+    }
 };
 
 module.exports = { send_error };

@@ -3,12 +3,10 @@ var express = require("express");
 var crypto = require("crypto");
 var { newUser, forgot_password } = require("../../functions/email");
 var { send_error } = require("../../functions/error");
-var {
-  check_user_token,
-  check_user_id
-} = require("../../functions/middleware");
+var { check_user_token, check_user_id, isAdmin } = require("../../functions/middleware");
 var { send_mail } = require("../../functions/email");
-const cors = require('cors');
+var cors = require('cors');
+var { disable_account, enable_account } = require("../../functions/user_functions");
 
 // create the router
 var router = express.Router();
@@ -70,7 +68,7 @@ router.post("/register", async function (req, res) {
 							if (err) throw err;
 							// Send the new user an email
 							newUser(first_name, email, result.insertId, req.headers.host);
-							res.send({ status: 200, message: "Successfully added user" });
+							return res.send({ status: 200, message: "Successfully added user" });
 						}
 					);
 				}
@@ -103,7 +101,7 @@ router.get("/verify/:email_verify_token", async function (req, res) {
 			} else {
 				let user_id = userInfo[0].id;
 				await query("INSERT INTO writers (user_id) VALUES (?)", [user_id]);
-				res.redirect("/success.html");
+				return res.redirect("/success.html");
 			}
 		}
 	);
@@ -146,7 +144,7 @@ router.post("/login", function (req, res) {
 
             let salt = results[0].salt;
 
-            crypto.pbkdf2(password, salt, 310000, 32, "sha256", function (err, hashedPassword) {
+            crypto.pbkdf2(password, salt, 310000, 32, "sha256", async function (err, hashedPassword) {
                 if (err) {
                     send_error(err, "Error hashing password");
                     res.status(500).send({ message: "Error hashing password" });
@@ -158,6 +156,14 @@ router.post("/login", function (req, res) {
                     let new_expire_date = new Date();
                     new_expire_date.setDate(new_expire_date.getDate() + 1);
                     new_expire_date = new_expire_date.toISOString().slice(0, 19).replace('T', ' ');
+
+					if(user.scheduled_for_deletion === 1 && user.account_disabled === 1 && user.scheduled_for_deletion_at !== null) {
+						let email = user.email;
+						let text = 'Geachte heer/mevrouw '+ user.last_name +',\n\nUw account is weer ingeschakeld. Als u dit niet heeft gedaan, wijzig dan uw inloggegevens.';
+						let subject = 'Account weer ingeschakeld';
+						send_mail(email, text, subject);
+						await query("UPDATE users SET scheduled_for_deletion = 0, scheduled_for_deletion_at = NULL, account_disabled = 0 WHERE id = ?", [user.id]);
+					}
 
                     // Create a user token
                     let token = crypto.randomBytes(16).toString("hex");
@@ -172,7 +178,7 @@ router.post("/login", function (req, res) {
                                 return;
                             }
 
-                            res.send({
+                            return res.send({
                                 status: 200,
                                 message: "Successfully logged in",
                                 user: {
@@ -208,7 +214,7 @@ router.post("/forgot_password", async function (req, res) {
 		return;
 	}
 	forgot_password(email, user[0].id, req.headers.host);
-	res.send({ status: 200, message: "Successfully sent email" });
+	return res.send({ status: 200, message: "Successfully sent email" });
 });
 
 // reset password with the reset token
@@ -250,7 +256,7 @@ router.post("/reset_password", async function (req, res) {
 						[hashedPassword, saltId, user[0].id],
 						function (err, result) {
 							if (err) throw err;
-							res.send({ status: 200, message: "Successfully reset password" });
+							return res.send({ status: 200, message: "Successfully reset password" });
 						}
 					);
 				}
@@ -264,7 +270,7 @@ router.get("/", async function (req, res) {
 	let users = await query("SELECT id,first_name,last_name,email,email_verified,phone_number,role,seller,scheduled_for_deletion,scheduled_for_deletion_at,account_disabled,created_at,updated_at FROM users");
 	let total_users_query = await query("SELECT COUNT(*) as total_users FROM users");
 	let total_users = total_users_query[0].total_users;
-	res.send({ status: 200, amount: total_users, users: users });
+	return res.send({ status: 200, amount: total_users, users: users });
 });
 
 // get a user by id
@@ -274,7 +280,7 @@ router.get("/:id", async function (req, res) {
         res.send({ status: 400, message: "User not found", user: null });
         return;
     }
-    res.send({ status: 200, user: user[0] });
+    return res.send({ status: 200, user: user[0] });
 });
 
 // change the user name
@@ -327,7 +333,33 @@ router.put("/settings/:id/email", check_user_token, check_user_id, async functio
 	
 	// send email to new email:
 	await send_mail(req.body.new_email, "Dit is een test bericht.", "Email wijziging");
-	res.send({ status: 200, message: "Sent an email to both old and new email addresses" });
+	return res.send({ status: 200, message: "Sent an email to both old and new email addresses" });
+});
+
+// The user disabled route
+router.delete("/settings/:id/delete", check_user_token, check_user_id, async function (req, res, next) {
+	await disable_account(req.params.id, false);
+
+	return res.send({ status: 200, message: "Successfully disabled account" });
+});
+
+// The user disabled by admin route
+router.put("/settings/:id/disable", check_user_token, isAdmin, async function (req, res, next) {if(req.user.id == req.params.id){
+	res.send({ status: 400, message: "You can't disable your own account" });
+	return;
+}
+	await disable_account(req.params.id, true);
+	return res.send({ status: 200, message: "Successfully disabled account by force." });
+});
+
+// The user enable route
+router.put("/settings/:id/enable", check_user_token, isAdmin, async function (req, res, next) {
+	if(req.user.id == req.params.id){
+		res.send({ status: 400, message: "You can't enable your own account" });
+		return;
+	}
+	await enable_account(req.params.id, true);
+	return res.send({ status: 200, message: "Successfully enabled account" });
 });
 
 module.exports = router;

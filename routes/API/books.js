@@ -4,8 +4,9 @@ var { send_error } = require("../../functions/error");
 var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
-var { check_user_token, isSeller } = require("../../functions/middleware");
-const cors = require('cors');
+var { check_user_token, isSeller, isAdmin } = require("../../functions/middleware");
+var cors = require('cors');
+var { send_mail } = require("../../functions/email");
 
 async function sanitizeFilename(filename) {
     if (!filename) {
@@ -39,7 +40,7 @@ const storage = multer.diskStorage({
         }
     },
     filename: (req, file, cb) => {
-        cb(null, file.fieldname+ Date.now() + path.extname(file.originalname)); // Append current timestamp to the file name
+        cb(null, file.fieldname+"-"+ Date.now() + path.extname(file.originalname)); // Append current timestamp to the file name
     }
 });
 
@@ -107,9 +108,9 @@ router.post('/add', check_user_token, isSeller, upload.fields([
         if(!category3 || category3 == 0) category3 = null;
         if(!category4 || category4 == 0) category4 = null;
 
-        // before all images add "http://185.192.97.1:55614" to the path
-        coverImageFilePath = "http://185.192.97.1:55614/" + coverImageFilePath;
-        bookImagesFilePath = bookImagesFilePath.map(image => "http://185.192.97.1:55614/" + image);
+        coverImageFilePath = "http://"+config.server.ip +":"+config.server.port+"/" + coverImageFilePath;
+        bookImagesFilePath = bookImagesFilePath[0].map(image => "http://"+config.server.ip +":"+config.server.port+"/" + image);
+        console.log(bookImagesFilePath)
 
         await query("INSERT INTO books (title, author, long_desc, short_desc, price, category_1, category_2, category_3, category_4, cover_image, images, format) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [title, author, lDescription, sDescription, price, category1, category2, category3, category4, coverImageFilePath, JSON.stringify(bookImagesFilePath), format]);
         
@@ -131,6 +132,53 @@ router.get("/:writer_id/:book_title", async function (req, res) {
         } else {
             res.status(404).json({ status: 404, message: "Book not found", book: [] });
         }
+    } catch (err) {
+        send_error(err, res);
+    }
+});
+
+// Remove a book
+router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req, res) {
+    try {
+        let { reason } = req.body;
+        if(!reason) return res.status(400).json({ status: 400, message: "Missing required fields" });
+        let book = await query("SELECT * FROM books WHERE id = ?", [req.params.id]);
+        if (book.length < 1) return res.status(404).json({ status: 404, message: "Book not found" });
+        db.query("DELETE FROM books WHERE id = ?", [req.params.id], async function (err, result) {
+            if (err) {
+                send_error(err, res);
+            }
+            // remove the images from the server
+            let cover_image = book[0].cover_image;
+            let cover_image_parts = cover_image.split("/");
+            let cover_image_path = cover_image_parts.slice(3, cover_image_parts.length - 1).join("/");
+            cover_image_path = path.join(__dirname, "../../public/", cover_image_path);
+            
+            // Remove the directory
+            try {
+                // check if the directory exists
+                if (fs.existsSync(cover_image_path)) {
+                    fs.rmdirSync(cover_image_path, { recursive: true });
+                }
+                console.log("Directory doesn't exist")
+            } catch (e) {
+                send_error(e, "Removing book + directory", res);
+                console.error("Error removing directory:", e);
+            }
+            let authorId = book[0].author;
+            let author = await query("SELECT * FROM writers WHERE id =?", [authorId]);
+            let authorUser = await query("SELECT * FROM users WHERE id =?", [author[0].user_id]);
+            // send mail to author[0].public_email and authorUser[0].email
+            if(!author[0].public_email && !authorUser[0].email) return res.status(400).json({ status: 400, message: "Author email not found. Book is still deleted. They're just not notified." });
+            if(author[0].public_email == authorUser[0].email){
+                await send_mail(author[0].public_email, `Geachte heer/mevrouw ${authorUser[0].last_name},\n\nUw boek "${book[0].title}" is verwijdert van onze website. Dit is de reden: \n${reason}\n\nAls u het hier niet mee eens bent kunt u contact opnemen met onze support medewerkers.`, "Boek verwijdert");
+                return res.json({ status: 200, message: "Book deleted" });
+            } else if(author[0].public_email != authorUser[0].email){ 
+                await send_mail(author[0].public_email, `Geachte heer/mevrouw ${authorUser[0].last_name},\n\nUw boek "${book[0].title}" is verwijdert van onze website. Dit is de reden: \n${reason}\n\nAls u het hier niet mee eens bent kunt u contact opnemen met onze support medewerkers.`, "Boek verwijdert");
+                await send_mail(authorUser[0].email, `Geachte heer/mevrouw ${authorUser[0].last_name},\n\nUw boek "${book[0].title}" is verwijdert van onze website. Dit is de reden: \n${reason}\n\nAls u het hier niet mee eens bent kunt u contact opnemen met onze support medewerkers.`, "Boek verwijdert");
+                res.json({ status: 200, message: "Book deleted" });
+            }
+        });
     } catch (err) {
         send_error(err, res);
     }

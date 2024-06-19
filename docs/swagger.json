@@ -162,7 +162,6 @@
 					"Users"
 				],
 				"description": "This endpoint is used to get all users",
-				"security": [],
 				"responses": {
 					"200": {
 						"description": "Users found",
@@ -216,7 +215,6 @@
 					"Users"
 				],
 				"description": "This endpoint is used to get a user",
-				"security": [],
 				"parameters": [
 					{
 						"name": "id",
@@ -465,6 +463,211 @@
 				"responses": {
 					"200": {
 						"description": "Password reset"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/email": {
+			"put": {
+				"summary": "Update email",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to update a user's email",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"email"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Email updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/name": {
+			"put": {
+				"summary": "Update name",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to update a user's name",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"first_name": {
+										"type": "string"
+									},
+									"last_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"first_name",
+									"last_name"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Name updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/disable": {
+			"put": {
+				"summary": "Disable user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to disable a user (Only works for admin users)",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User disabled successfully"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/enable": {
+			"put": {
+				"summary": "Enable user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to enable a user (Only works for admin users)",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User enabled successfully"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/users/settings/{id}/delete": {
+			"delete": {
+				"summary": "Delete user",
+				"tags": [
+					"Users"
+				],
+				"description": "This endpoint is used to delete a user",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User deletion scheduled successfully"
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequestError"
@@ -754,6 +957,78 @@
 				}
 			}
 		},
+		"/books/{writerId}/{bookTitle}": {
+			"get": {
+				"summary": "Get a book",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to get a book",
+				"security": [],
+				"parameters": [
+					{
+						"name": "writerId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "bookTitle",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Book found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"cover_image": {
+											"type": "string"
+										},
+										"author": {
+											"type": "integer"
+										},
+										"price": {
+											"type": "number"
+										},
+										"published_at": {
+											"type": "string"
+										},
+										"created_at": {
+											"type": "string"
+										},
+										"updated_at": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/books/add": {
 			"post": {
 			  	"summary": "Add a book",
@@ -814,6 +1089,57 @@
 				"responses": {
 					"201": {
 						"description": "Book added"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/books/admin/book/{id}": {
+			"delete": {
+				"summary": "Delete a book",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to delete a book",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"reason": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"reason"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Book updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
 					},
 					"500": {
 						"$ref": "#/components/responses/ServerError"

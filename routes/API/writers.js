@@ -9,7 +9,7 @@ const cors = require('cors');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '../../public/images/uploads/'+req.user.first_name);
+        const uploadPath = path.join(__dirname, '../../public/images/uploads/'+req.user.first_name +"/"+req.user.last_name);
         fs.mkdirSync(uploadPath, { recursive: true }); // Ensure the uploads directory exists
         cb(null, uploadPath);
     },
@@ -36,6 +36,8 @@ router.get('/', async function(req, res, next){
             let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [writers[i].user_id]);
             writers[i].first_name = user[0].first_name;
             writers[i].last_name = user[0].last_name;
+            let books = await query("SELECT * FROM books WHERE author = ?", [writers[i].id]);
+            writers[i].books = books;
         }
         if(writers.length > 0){
             await res.json({status: 200, message: "Success!", amount: total_writers, writers: writers});
@@ -55,6 +57,8 @@ router.get('/:id', async function(req, res, next){
         let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [writer[0].user_id]);
         writer[0].first_name = user[0].first_name;
         writer[0].last_name = user[0].last_name;
+        let books = await query("SELECT * FROM books WHERE author = ?", [writer[0].id]);
+        writer[0].books = books;
         if(writer.length > 0){
             res.json({status: 200, message: "Success!", writer: writer[0]});
         } else{
