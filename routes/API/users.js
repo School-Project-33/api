@@ -68,7 +68,7 @@ router.post("/register", async function (req, res) {
 							if (err) throw err;
 							// Send the new user an email
 							newUser(first_name, email, result.insertId, req.headers.host);
-							res.send({ status: 200, message: "Successfully added user" });
+							return res.send({ status: 200, message: "Successfully added user" });
 						}
 					);
 				}
@@ -101,7 +101,7 @@ router.get("/verify/:email_verify_token", async function (req, res) {
 			} else {
 				let user_id = userInfo[0].id;
 				await query("INSERT INTO writers (user_id) VALUES (?)", [user_id]);
-				res.redirect("/success.html");
+				return res.redirect("/success.html");
 			}
 		}
 	);
@@ -178,7 +178,7 @@ router.post("/login", function (req, res) {
                                 return;
                             }
 
-                            res.send({
+                            return res.send({
                                 status: 200,
                                 message: "Successfully logged in",
                                 user: {
@@ -214,7 +214,7 @@ router.post("/forgot_password", async function (req, res) {
 		return;
 	}
 	forgot_password(email, user[0].id, req.headers.host);
-	res.send({ status: 200, message: "Successfully sent email" });
+	return res.send({ status: 200, message: "Successfully sent email" });
 });
 
 // reset password with the reset token
@@ -256,7 +256,7 @@ router.post("/reset_password", async function (req, res) {
 						[hashedPassword, saltId, user[0].id],
 						function (err, result) {
 							if (err) throw err;
-							res.send({ status: 200, message: "Successfully reset password" });
+							return res.send({ status: 200, message: "Successfully reset password" });
 						}
 					);
 				}
@@ -270,7 +270,7 @@ router.get("/", async function (req, res) {
 	let users = await query("SELECT id,first_name,last_name,email,email_verified,phone_number,role,seller,scheduled_for_deletion,scheduled_for_deletion_at,account_disabled,created_at,updated_at FROM users");
 	let total_users_query = await query("SELECT COUNT(*) as total_users FROM users");
 	let total_users = total_users_query[0].total_users;
-	res.send({ status: 200, amount: total_users, users: users });
+	return res.send({ status: 200, amount: total_users, users: users });
 });
 
 // get a user by id
@@ -280,7 +280,7 @@ router.get("/:id", async function (req, res) {
         res.send({ status: 400, message: "User not found", user: null });
         return;
     }
-    res.send({ status: 200, user: user[0] });
+    return res.send({ status: 200, user: user[0] });
 });
 
 // change the user name
@@ -333,13 +333,14 @@ router.put("/settings/:id/email", check_user_token, check_user_id, async functio
 	
 	// send email to new email:
 	await send_mail(req.body.new_email, "Dit is een test bericht.", "Email wijziging");
-	res.send({ status: 200, message: "Sent an email to both old and new email addresses" });
+	return res.send({ status: 200, message: "Sent an email to both old and new email addresses" });
 });
 
 // The user disabled route
 router.delete("/settings/:id/delete", check_user_token, check_user_id, async function (req, res, next) {
 	await disable_account(req.params.id, false);
-	res.send({ status: 200, message: "Successfully disabled account" });
+
+	return res.send({ status: 200, message: "Successfully disabled account" });
 });
 
 // The user disabled by admin route
@@ -348,7 +349,7 @@ router.put("/settings/:id/disable", check_user_token, isAdmin, async function (r
 	return;
 }
 	await disable_account(req.params.id, true);
-	res.send({ status: 200, message: "Successfully disabled account by force." });
+	return res.send({ status: 200, message: "Successfully disabled account by force." });
 });
 
 // The user enable route
@@ -358,7 +359,7 @@ router.put("/settings/:id/enable", check_user_token, isAdmin, async function (re
 		return;
 	}
 	await enable_account(req.params.id, true);
-	res.send({ status: 200, message: "Successfully enabled account" });
+	return res.send({ status: 200, message: "Successfully enabled account" });
 });
 
 module.exports = router;
