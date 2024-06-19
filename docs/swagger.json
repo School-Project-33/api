@@ -1096,6 +1096,44 @@
 				}
 			}
 		},
+		"/books/writer/{writer_id}/book/{book_id}": {
+			"delete": {
+				"summary": "Delete a book",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to delete a book",
+				"parameters": [
+					{
+						"name": "writer_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "book_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Book deleted"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/books/admin/book/{id}": {
 			"delete": {
 				"summary": "Delete a book",
