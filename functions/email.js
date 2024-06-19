@@ -93,7 +93,7 @@ async function order_email(email, book_id, order_id, res, req){
     });
 
     let subject = 'Order bevestiging';
-    let text = 'Geachte heer/mevrouw'+ orderUser[0].last_name +',\n\nU heeft een order geplaatst voor het boek: '+ book[0].title +'\nDe schrijver van dit boek is: '+ writerUser[0].first_name+ " "+ writerUser[0].last_name +'\nUw order ID is: #'+ order[0].order_id +'\nUw order status is: '+ order[0].order_status +'\n\nBedankt voor uw bestelling.';
+    let text = 'Geachte heer/mevrouw '+ orderUser[0].last_name +',\n\nU heeft een order geplaatst voor het boek: '+ book[0].title +'\nDe schrijver van dit boek is: '+ writerUser[0].first_name+ " "+ writerUser[0].last_name +'\nUw order ID is: #'+ order[0].order_id +'\nUw order status is: '+ order[0].order_status +'\n\nBedankt voor uw bestelling.';
     
     send_mail(email, text, subject);
 }
@@ -108,7 +108,7 @@ async function update_order_email(email, order_id, req, res){
     let writerUser = await query('SELECT * FROM users WHERE id = ?', [writer[0].user_id]);
     if(writerUser.length < 1) return res.status(404).send({ "status": 404, "message": "No user found" });
 
-    let orderUser = await query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    let orderUser = await query('SELECT * FROM users WHERE id = ?', [order[0].user_id]);
     if(orderUser.length < 1) return res.status(404).send({ "status": 404, "message": "No user found" });
 
     // get the order status in text
@@ -118,7 +118,7 @@ async function update_order_email(email, order_id, req, res){
     });
 
     let subject = 'Order update';
-    let text = 'Geachte heer/mevrouw'+ orderUser[0].last_name +',\n\nUw order voor het boek: '+ book[0].title +'\nDe schrijver van dit boek is: '+ writerUser[0].first_name+ " "+ writerUser[0].last_name +'\nUw order ID is: #'+ order[0].order_id +'\nUw order status is: '+ order[0].order_status +'\n\nBedankt voor uw bestelling.';
+    let text = 'Geachte heer/mevrouw '+ orderUser[0].last_name +',\n\nUw order voor het boek: '+ book[0].title +'\nDe schrijver van dit boek is: '+ writerUser[0].first_name+ " "+ writerUser[0].last_name +'\nUw order ID is: #'+ order[0].order_id +'\nUw order status is: '+ order[0].order_status +'\n\nBedankt voor uw bestelling.';
     send_mail(email, text, subject);
 }
 
