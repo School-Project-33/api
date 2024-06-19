@@ -754,6 +754,78 @@
 				}
 			}
 		},
+		"/books/{writerId}/{bookTitle}": {
+			"get": {
+				"summary": "Get a book",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to get a book",
+				"security": [],
+				"parameters": [
+					{
+						"name": "writerId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "bookTitle",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Book found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										},
+										"cover_image": {
+											"type": "string"
+										},
+										"author": {
+											"type": "integer"
+										},
+										"price": {
+											"type": "number"
+										},
+										"published_at": {
+											"type": "string"
+										},
+										"created_at": {
+											"type": "string"
+										},
+										"updated_at": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/books/add": {
 			"post": {
 			  	"summary": "Add a book",

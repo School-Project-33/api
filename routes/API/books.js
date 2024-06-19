@@ -56,6 +56,12 @@ router.get("/", async function (req, res) {
         let books = await query("SELECT * FROM books");
         let total_books_query = await query("SELECT COUNT(*) as total_books FROM books");
 	    let total_books = total_books_query[0].total_books;
+        // for each book get the authors name and add it to the book object
+        for (let i = 0; i < books.length; i++) {
+            let author = await query("SELECT user_id FROM writers WHERE id = ?", [books[i].author]);
+            let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [author[0].user_id]);
+            books[i].author = user[0].first_name + " " + user[0].last_name;
+        }
         res.json({ status: 200, message: "Successfully got all books", amount: total_books, books: books });
     } catch (err) {
         send_error(err, res);
@@ -126,6 +132,9 @@ router.get("/:writer_id/:book_title", async function (req, res) {
         if(author.length < 1) return res.status(404).json({ status: 404, message: "Author not found", book: [] });
         // find the book with the title and the author
         let book = await query("SELECT * FROM books WHERE title = ? AND author = ?", [req.params.book_title, author[0].id]);
+        let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [author[0].user_id]);
+        book[0].author = user[0].first_name + " " + user[0].last_name;
+
         if (book.length > 0) {
             res.json({ status: 200, message: "Success!", book: book[0] });
         } else {
