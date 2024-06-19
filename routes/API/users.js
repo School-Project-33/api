@@ -159,11 +159,8 @@ router.post("/login", function (req, res) {
                     let new_expire_date = new Date();
                     new_expire_date.setDate(new_expire_date.getDate() + 1);
                     new_expire_date = new_expire_date.toISOString().slice(0, 19).replace('T', ' ');
-
-					console.log("test")
-
-					if(user.scheduled_for_deletion === true && user.account_disabled === true && user.scheduled_for_deletion_at !== null) {
-						console.log("Account word weer gebruikt")
+					
+					if(user.scheduled_for_deletion === 1 && user.account_disabled === 1 && user.scheduled_for_deletion_at !== null) {
 						let email = user.email;
 						let text = 'Geachte heer/mevrouw '+ user.last_name +',\n\nUw account is weer ingeschakeld. Als u dit niet heeft gedaan, wijzig dan uw inloggegevens.';
 						let subject = 'Account weer ingeschakeld';
@@ -343,13 +340,13 @@ router.put("/settings/:id/email", check_user_token, check_user_id, async functio
 });
 
 // The user disabled route
-router.put("/settings/:id/disable", check_user_token, check_user_id, async function (req, res, next) {
+router.put("/settings/:id/delete", check_user_token, check_user_id, async function (req, res, next) {
 	await disable_account(req.params.id, false);
 	res.send({ status: 200, message: "Successfully disabled account" });
 });
 
 // The user enable route
-router.put("/settings/:id/enable", check_user_token, check_user_id, async function (req, res, next) {
+router.put("/settings/:id/not_delete", check_user_token, check_user_id, async function (req, res, next) {
 	await enable_account(req.params.id, false);
 	res.send({ status: 200, message: "Successfully enabled account" });
 });
