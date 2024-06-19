@@ -219,6 +219,7 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	category_3 INT, \
 	category_4 INT, \
 	format INT NOT NULL, \
+	e_book_path TEXT, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
 	FOREIGN KEY (author) REFERENCES writers(id), \
