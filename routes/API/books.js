@@ -4,7 +4,7 @@ var { send_error } = require("../../functions/error");
 var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
-var { check_user_token, isSeller } = require("../../functions/middleware");
+var { check_user_token, isSeller, isAdmin } = require("../../functions/middleware");
 const cors = require('cors');
 
 async function sanitizeFilename(filename) {
@@ -39,7 +39,7 @@ const storage = multer.diskStorage({
         }
     },
     filename: (req, file, cb) => {
-        cb(null, file.fieldname+ Date.now() + path.extname(file.originalname)); // Append current timestamp to the file name
+        cb(null, file.fieldname+"-"+ Date.now() + path.extname(file.originalname)); // Append current timestamp to the file name
     }
 });
 
@@ -107,9 +107,9 @@ router.post('/add', check_user_token, isSeller, upload.fields([
         if(!category3 || category3 == 0) category3 = null;
         if(!category4 || category4 == 0) category4 = null;
 
-        // before all images add "http://185.192.97.1:55614" to the path
-        coverImageFilePath = "http://185.192.97.1:55614/" + coverImageFilePath;
-        bookImagesFilePath = bookImagesFilePath.map(image => "http://185.192.97.1:55614/" + image);
+        coverImageFilePath = "http://"+config.server.ip +":"+config.server.port+"/" + coverImageFilePath;
+        bookImagesFilePath = bookImagesFilePath[0].map(image => "http://"+config.server.ip +":"+config.server.port+"/" + image);
+        console.log(bookImagesFilePath)
 
         await query("INSERT INTO books (title, author, long_desc, short_desc, price, category_1, category_2, category_3, category_4, cover_image, images, format) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [title, author, lDescription, sDescription, price, category1, category2, category3, category4, coverImageFilePath, JSON.stringify(bookImagesFilePath), format]);
         
@@ -131,6 +131,18 @@ router.get("/:writer_id/:book_title", async function (req, res) {
         } else {
             res.status(404).json({ status: 404, message: "Book not found", book: [] });
         }
+    } catch (err) {
+        send_error(err, res);
+    }
+});
+
+// Remove a book
+router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req, res) {
+    try {
+        let book = await query("SELECT * FROM books WHERE id = ?", [req.params.id]);
+        if (book.length < 1) return res.status(404).json({ status: 404, message: "Book not found" });
+        await query("DELETE FROM books WHERE id = ?", [req.params.id]);
+        res.json({ status: 200, message: "Book deleted" });
     } catch (err) {
         send_error(err, res);
     }
