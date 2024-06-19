@@ -5,7 +5,8 @@ var multer = require("multer");
 var path = require("path");
 var fs = require("fs");
 var { check_user_token, isSeller, isAdmin } = require("../../functions/middleware");
-const cors = require('cors');
+var cors = require('cors');
+var { send_mail } = require("../../functions/email");
 
 async function sanitizeFilename(filename) {
     if (!filename) {
@@ -56,12 +57,6 @@ router.get("/", async function (req, res) {
         let books = await query("SELECT * FROM books");
         let total_books_query = await query("SELECT COUNT(*) as total_books FROM books");
 	    let total_books = total_books_query[0].total_books;
-        // for each book get the authors name and add it to the book object
-        for (let i = 0; i < books.length; i++) {
-            let author = await query("SELECT user_id FROM writers WHERE id = ?", [books[i].author]);
-            let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [author[0].user_id]);
-            books[i].author = user[0].first_name + " " + user[0].last_name;
-        }
         res.json({ status: 200, message: "Successfully got all books", amount: total_books, books: books });
     } catch (err) {
         send_error(err, res);
@@ -132,9 +127,6 @@ router.get("/:writer_id/:book_title", async function (req, res) {
         if(author.length < 1) return res.status(404).json({ status: 404, message: "Author not found", book: [] });
         // find the book with the title and the author
         let book = await query("SELECT * FROM books WHERE title = ? AND author = ?", [req.params.book_title, author[0].id]);
-        let user = await query("SELECT first_name, last_name FROM users WHERE id = ?", [author[0].user_id]);
-        book[0].author = user[0].first_name + " " + user[0].last_name;
-
         if (book.length > 0) {
             res.json({ status: 200, message: "Success!", book: book[0] });
         } else {
@@ -148,32 +140,35 @@ router.get("/:writer_id/:book_title", async function (req, res) {
 // Remove a book
 router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req, res) {
     try {
+        let { reason } = req.body;
+        if(!reason) return res.status(400).json({ status: 400, message: "Missing required fields" });
         let book = await query("SELECT * FROM books WHERE id = ?", [req.params.id]);
         if (book.length < 1) return res.status(404).json({ status: 404, message: "Book not found" });
-        db.query("DELETE FROM books WHERE id = ?", [req.params.id], function (err, result) {
+        db.query("DELETE FROM books WHERE id = ?", [req.params.id], async function (err, result) {
             if (err) {
                 send_error(err, res);
             }
             // remove the images from the server
             let cover_image = book[0].cover_image;
-            console.log(cover_image);
-
-            // Get everything after the 3rd "/"
             let cover_image_parts = cover_image.split("/");
-            console.log(cover_image_parts[2]);
-
-            // Join parts after the 3rd "/" excluding the last part (the filename)
             let cover_image_path = cover_image_parts.slice(3, cover_image_parts.length - 1).join("/");
-            console.log(cover_image_path);
-
-            // Construct the full path
             cover_image_path = path.join(__dirname, "../../public/", cover_image_path);
-            console.log(cover_image_path);
             
             // Remove the directory
-            fs.rmdirSync(cover_image_path, { recursive: true });
-
-            res.json({ status: 200, message: "Book deleted" });
+            // fs.rmdirSync(cover_image_path, { recursive: true });
+            let authorId = book[0].author;
+            let author = await query("SELECT * FROM writers WHERE id =?", [authorId]);
+            let authorUser = await query("SELECT * FROM users WHERE id =?", [author[0].user_id]);
+            // send mail to author[0].public_email and authorUser[0].email
+            if(!author[0].public_email && !authorUser[0].email) return res.status(400).json({ status: 400, message: "Author email not found. Book is still deleted. They're just not notified." });
+            if(author[0].public_email == authorUser[0].email){
+                await send_mail(author[0].public_email, `Geachte heer/mevrouw ${authorUser[0].last_name},\n\nUw boek "${book[0].title}" is verwijdert van onze website. Dit is de reden: \n${reason}\n\nAls u het hier niet mee eens bent kunt u contact opnemen met onze support medewerkers.`, "Boek verwijdert");
+                return res.json({ status: 200, message: "Book deleted" });
+            } else if(author[0].public_email != authorUser[0].email){ 
+                await send_mail(author[0].public_email, `Geachte heer/mevrouw ${authorUser[0].last_name},\n\nUw boek "${book[0].title}" is verwijdert van onze website. Dit is de reden: \n${reason}\n\nAls u het hier niet mee eens bent kunt u contact opnemen met onze support medewerkers.`, "Boek verwijdert");
+                await send_mail(authorUser[0].email, `Geachte heer/mevrouw ${authorUser[0].last_name},\n\nUw boek "${book[0].title}" is verwijdert van onze website. Dit is de reden: \n${reason}\n\nAls u het hier niet mee eens bent kunt u contact opnemen met onze support medewerkers.`, "Boek verwijdert");
+                res.json({ status: 200, message: "Book deleted" });
+            }
         });
     } catch (err) {
         send_error(err, res);
