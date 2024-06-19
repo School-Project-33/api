@@ -132,3 +132,6 @@ dist
 
 # vscode extentions
 /.vscode/
+
+# Uploaded images
+public/images/uploads/
