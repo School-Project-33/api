@@ -892,6 +892,39 @@
 					}
 				}
 			}
+		},
+		"/books/admin/book/{id}": {
+			"delete": {
+				"summary": "Delete a book",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to delete a book",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Book updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
 		}
 	}
 }
