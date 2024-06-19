@@ -8,7 +8,8 @@ var {
   check_user_id
 } = require("../../functions/middleware");
 var { send_mail } = require("../../functions/email");
-const cors = require('cors');
+var cors = require('cors');
+var { disable_account, enable_account } = require("../../functions/user_functions");
 
 // create the router
 var router = express.Router();
@@ -146,7 +147,7 @@ router.post("/login", function (req, res) {
 
             let salt = results[0].salt;
 
-            crypto.pbkdf2(password, salt, 310000, 32, "sha256", function (err, hashedPassword) {
+            crypto.pbkdf2(password, salt, 310000, 32, "sha256", async function (err, hashedPassword) {
                 if (err) {
                     send_error(err, "Error hashing password");
                     res.status(500).send({ message: "Error hashing password" });
@@ -158,6 +159,17 @@ router.post("/login", function (req, res) {
                     let new_expire_date = new Date();
                     new_expire_date.setDate(new_expire_date.getDate() + 1);
                     new_expire_date = new_expire_date.toISOString().slice(0, 19).replace('T', ' ');
+
+					console.log("test")
+
+					if(user.scheduled_for_deletion === true && user.account_disabled === true && user.scheduled_for_deletion_at !== null) {
+						console.log("Account word weer gebruikt")
+						let email = user.email;
+						let text = 'Geachte heer/mevrouw '+ user.last_name +',\n\nUw account is weer ingeschakeld. Als u dit niet heeft gedaan, wijzig dan uw inloggegevens.';
+						let subject = 'Account weer ingeschakeld';
+						send_mail(email, text, subject);
+						await query("UPDATE users SET scheduled_for_deletion = 0, scheduled_for_deletion_at = NULL, account_disabled = 0 WHERE id = ?", [user.id]);
+					}
 
                     // Create a user token
                     let token = crypto.randomBytes(16).toString("hex");
@@ -328,6 +340,18 @@ router.put("/settings/:id/email", check_user_token, check_user_id, async functio
 	// send email to new email:
 	await send_mail(req.body.new_email, "Dit is een test bericht.", "Email wijziging");
 	res.send({ status: 200, message: "Sent an email to both old and new email addresses" });
+});
+
+// The user disabled route
+router.put("/settings/:id/disable", check_user_token, check_user_id, async function (req, res, next) {
+	await disable_account(req.params.id, false);
+	res.send({ status: 200, message: "Successfully disabled account" });
+});
+
+// The user enable route
+router.put("/settings/:id/enable", check_user_token, check_user_id, async function (req, res, next) {
+	await enable_account(req.params.id, false);
+	res.send({ status: 200, message: "Successfully enabled account" });
 });
 
 module.exports = router;
