@@ -155,7 +155,16 @@ router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req,
             cover_image_path = path.join(__dirname, "../../public/", cover_image_path);
             
             // Remove the directory
-            // fs.rmdirSync(cover_image_path, { recursive: true });
+            try {
+                // check if the directory exists
+                if (!fs.existsSync(cover_image_path)) {
+                    return console.log("Directory doesn't exist")
+                }
+                fs.rmdirSync(cover_image_path, { recursive: true });
+            } catch (e) {
+                send_error(e, "Removing book + directory", res);
+                console.error("Error removing directory:", e);
+            }
             let authorId = book[0].author;
             let author = await query("SELECT * FROM writers WHERE id =?", [authorId]);
             let authorUser = await query("SELECT * FROM users WHERE id =?", [author[0].user_id]);
