@@ -5,11 +5,13 @@ var logger = require('morgan');
 var { send_error } = require('./functions/error.js');
 var db = require('./db.js');
 var { query } = require(`./functions/database_queries.js`);
-const cors = require('cors');
+var cors = require('cors');
+var config = require('./configs/config.json');
 
 // require the routers
 var indexRouter = require('./routes/index');
 
+global.config = config;
 global.db = db;
 global.query = query;
 
