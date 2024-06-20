@@ -24,7 +24,11 @@ const storage = multer.diskStorage({
             let sanitizedAuthorLastName = await sanitizeFilename(req.user.last_name);
 
             if(!req.body.title || !req.user.first_name || !req.user.last_name) {
-                return cb(new Error('Missing required fields'));
+                let missing = [];
+                if(!req.body.title) missing.push("title");
+                if(!req.user.first_name) missing.push("first_name");
+                if(!req.user.last_name) missing.push("last_name");
+                return cb(new Error('Missing required fields: '+ missing.join(', ')));
             }
             
             // Ensure sanitized variables are defined
@@ -57,6 +61,14 @@ router.get("/", async function (req, res) {
         let books = await query("SELECT * FROM books");
         let total_books_query = await query("SELECT COUNT(*) as total_books FROM books");
 	    let total_books = total_books_query[0].total_books;
+        // get the user_id fromt he writers table
+        for (let i = 0; i < books.length; i++){
+            let author = await query("SELECT user_id FROM writers WHERE id =?", [books[i].author]);
+            let user = await query("SELECT first_name, last_name FROM users WHERE id =?", [author[0].user_id]);
+            books[i].first_name = user[0].first_name;
+            books[i].last_name = user[0].last_name;
+        }
+
         res.json({ status: 200, message: "Successfully got all books", amount: total_books, books: books });
     } catch (err) {
         send_error(err, res);
@@ -110,7 +122,6 @@ router.post('/add', check_user_token, isSeller, upload.fields([
 
         coverImageFilePath = "http://"+config.server.ip +":"+config.server.port+"/" + coverImageFilePath;
         bookImagesFilePath = bookImagesFilePath[0].map(image => "http://"+config.server.ip +":"+config.server.port+"/" + image);
-        console.log(bookImagesFilePath)
 
         await query("INSERT INTO books (title, author, long_desc, short_desc, price, category_1, category_2, category_3, category_4, cover_image, images, format) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [title, author, lDescription, sDescription, price, category1, category2, category3, category4, coverImageFilePath, JSON.stringify(bookImagesFilePath), format]);
         
@@ -160,7 +171,7 @@ router.delete('/admin/book/:id', check_user_token, isAdmin, async function (req,
                 if (fs.existsSync(cover_image_path)) {
                     fs.rmdirSync(cover_image_path, { recursive: true });
                 }
-                console.log("Directory doesn't exist")
+                console.error("Directory doesn't exist")
             } catch (e) {
                 send_error(e, "Removing book + directory", res);
                 console.error("Error removing directory:", e);
@@ -207,7 +218,7 @@ router.delete('/writer/:id/book/:book_id', check_user_token, check_writer_id, as
                 if (fs.existsSync(cover_image_path)) {
                     fs.rmdirSync(cover_image_path, { recursive: true });
                 }
-                console.log("Directory doesn't exist")
+                console.error("Directory doesn't exist, Continuing without deleting...");
             } catch (e) {
                 send_error(e, "Removing book + directory", res);
                 console.error("Error removing directory:", e);
