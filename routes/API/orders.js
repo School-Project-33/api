@@ -20,7 +20,9 @@ router.get("/", check_user_token, isAdmin, async function (req, res) {
         orders.forEach(function (order) {
             order.order_status = order_status[order.order_status - 1].status;
         });
-        res.status(200).send({ "status": 200, "orders": orders });
+        // get the amount of all orders
+        let amount = await query("SELECT COUNT(*) AS amount FROM orders");
+        res.status(200).send({ "status": 200, amount: amount[0].amount, "orders": orders });
     } catch (err) {
         console.error(err);
         send_error(err, "Posting contact form failed", res);
