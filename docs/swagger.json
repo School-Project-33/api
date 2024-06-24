@@ -1096,6 +1096,44 @@
 				}
 			}
 		},
+		"/books/writer/{writer_id}/book/{book_id}": {
+			"delete": {
+				"summary": "Delete a book",
+				"tags": [
+					"Books"
+				],
+				"description": "This endpoint is used to delete a book",
+				"parameters": [
+					{
+						"name": "writer_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "book_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Book deleted"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
 		"/books/admin/book/{id}": {
 			"delete": {
 				"summary": "Delete a book",
@@ -1137,6 +1175,660 @@
 					},
 					"400": {
 						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders": {
+			"get": {
+				"summary": "Get all orders",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get all orders",
+				"responses": {
+					"200": {
+						"description": "Orders found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"book_id": {
+												"type": "integer"
+											},
+											"status": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/order/{userId}/{orderId}": {
+			"get": {
+				"summary": "Get an order",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get an order",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "orderId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Order found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string"
+										},
+										"user_id": {
+											"type": "integer"
+										},
+										"book_id": {
+											"type": "integer"
+										},
+										"status": {
+											"type": "string"
+										},
+										"created_at": {
+											"type": "string"
+										},
+										"updated_at": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/ordered_by/{userId}": {
+			"get": {
+				"summary": "Get orders by user",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get orders by user",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Orders found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"book_id": {
+												"type": "integer"
+											},
+											"status": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/ordered_book/{bookId}": {
+			"get": {
+				"summary": "Get orders by book",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to get orders by book",
+				"parameters": [
+					{
+						"name": "bookId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Orders found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"user_id": {
+												"type": "integer"
+											},
+											"book_id": {
+												"type": "integer"
+											},
+											"status": {
+												"type": "string"
+											},
+											"created_at": {
+												"type": "string"
+											},
+											"updated_at": {
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/new": {
+			"post": {
+				"summary": "Add a new order",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to add a new order",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"quantity": {
+										"type": "integer"
+									},
+									"book_id": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"quantity",
+									"book_id"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Order added"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/orders/update/{orderId}": {
+			"put": {
+				"summary": "Update an order",
+				"tags": [
+					"Orders"
+				],
+				"description": "This endpoint is used to update an order",
+				"parameters": [
+					{
+						"name": "orderId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"status": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"status"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Order updated"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/reviews": {
+			"get": {
+				"summary": "Get all reviews",
+				"tags": [
+					"Reviews"
+				],
+				"security": [],
+				"description": "This endpoint is used to get all reviews",
+				"responses": {
+					"200": {
+						"description": "Reviews found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"status": {
+												"type": "integer"
+											},
+											"reviews": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"book_id": {
+															"type": "integer"
+														},
+														"user_id": {
+															"type": "integer"
+														},
+														"review": {
+															"type": "string"
+														},
+														"rating": {
+															"type": "integer"
+														},
+														"created_at": {
+															"type": "string"
+														},
+														"updated_at": {
+															"type": "string"
+														},
+														"global_rating": {
+															"type": "integer"
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/reviews/review/{id}": {
+			"get": {
+				"summary": "Get a review",
+				"tags": [
+					"Reviews"
+				],
+				"security": [],
+				"description": "This endpoint is used to get a review",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Review found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "integer"
+										},
+										"review": {
+											"type": "object",
+											"properties": {
+												"id": {
+													"type": "string"
+												},
+												"book_id": {
+													"type": "integer"
+												},
+												"user_id": {
+													"type": "integer"
+												},
+												"review": {
+													"type": "string"
+												},
+												"rating": {
+													"type": "integer"
+												},
+												"created_at": {
+													"type": "string"
+												},
+												"updated_at": {
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/reviews/user/{user_id}": {
+			"get": {
+				"summary": "Get reviews by user",
+				"tags": [
+					"Reviews"
+				],
+				"security": [],
+				"description": "This endpoint is used to get reviews by user",
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Reviews found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"status": {
+												"type": "integer"
+											},
+											"reviews": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string"
+														},
+														"book_id": {
+															"type": "integer"
+														},
+														"user_id": {
+															"type": "integer"
+														},
+														"review": {
+															"type": "string"
+														},
+														"rating": {
+															"type": "integer"
+														},
+														"created_at": {
+															"type": "string"
+														},
+														"updated_at": {
+															"type": "string"
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/reviews/new/{book_id}": {
+			"post": {
+				"summary": "Add a new review",
+				"tags": [
+					"Reviews"
+				],
+				"description": "This endpoint is used to add a new review",
+				"parameters": [
+					{
+						"name": "book_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"review": {
+										"type": "string"
+									},
+									"rating": {
+										"type": "integer"
+									}
+								},
+								"required": [
+									"review",
+									"rating"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Review added"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequestError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/reviews/delete/{review_id}": {
+			"delete": {
+				"summary": "Delete a review as admin user",
+				"tags": [
+					"Reviews"
+				],
+				"description": "This endpoint is used to delete a review as admin user",
+				"parameters": [
+					{
+						"name": "review_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Review deleted & email sent."
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFoundError"
+					},
+					"500": {
+						"$ref": "#/components/responses/ServerError"
+					}
+				}
+			}
+		},
+		"/reviews/delete/{user_id}/{review_id}": {
+			"delete": {
+				"summary": "Delete a review as user",
+				"tags": [
+					"Reviews"
+				],
+				"description": "This endpoint is used to delete a review as user",
+				"parameters": [
+					{
+						"name": "user_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"name": "review_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Review deleted"
 					},
 					"404": {
 						"$ref": "#/components/responses/NotFoundError"

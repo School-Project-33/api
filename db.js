@@ -196,6 +196,7 @@ db.query("SELECT * FROM formats", function (err, result) {
 	if (result.length === 0) {
 		db.query("INSERT INTO formats (name, description) VALUES (?, ?)", ['Paperback', 'Paperback format']);
 		db.query("INSERT INTO formats (name, description) VALUES (?, ?)", ['Hardcover', 'Hardcover format']);
+		db.query("INSERT INTO formats (name, description) VALUES (?, ?)", ['PDF', 'PDF format']);
 		db.query("INSERT INTO formats (name, description) VALUES (?, ?)", ['Ebook', 'Ebook format'], function (err, result) {
 			if (err) throw err;
 			console.log("Default formats created");
@@ -218,6 +219,7 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	category_3 INT, \
 	category_4 INT, \
 	format INT NOT NULL, \
+	e_book_path TEXT, \
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
 	FOREIGN KEY (author) REFERENCES writers(id), \
@@ -233,52 +235,115 @@ db.query("CREATE TABLE IF NOT EXISTS books ( \
 	}
 });
 
-// // create the reviews table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, book_id INT NOT NULL, user_id INT NOT NULL, review TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (book_id) REFERENCES books(id), FOREIGN KEY (user_id) REFERENCES users(id)
-// db.query("CREATE TABLE IF NOT EXISTS reviews ( \
+// create the order_status table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, status TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+db.query("CREATE TABLE IF NOT EXISTS order_status ( \
+	id INT AUTO_INCREMENT PRIMARY KEY, \
+	status TEXT NOT NULL, \
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP \
+)", function (err, result) {
+	if (err) throw err;
+	if(result.changedRows > 0){
+		console.log("Table order_status created");
+	}
+});
+
+// create the following order statuses in the order_status table if the table is empty. These are the order statuses: Pending, Processing, Shipped, Delivered, Cancelled
+db.query("SELECT * FROM order_status", function (err, result) {
+	if (err) throw err;
+	// If the order_status table is empty, create the default order statuses
+	if (result.length === 0) {
+		db.query("INSERT INTO order_status (status) VALUES (?)", ['Pending']);
+		db.query("INSERT INTO order_status (status) VALUES (?)", ['Processing']);
+		db.query("INSERT INTO order_status (status) VALUES (?)", ['Shipped']);
+		db.query("INSERT INTO order_status (status) VALUES (?)", ['Delivered']);
+		db.query("INSERT INTO order_status (status) VALUES (?)", ['Cancelled'], function (err, result) {
+			if (err) throw err;
+			console.log("Default order statuses created");
+		});
+	}
+});
+
+// create the orders table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, basket_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (book_id) REFERENCES books(id)
+db.query("CREATE TABLE IF NOT EXISTS orders ( \
+	id INT AUTO_INCREMENT PRIMARY KEY, \
+	user_id INT NOT NULL, \
+	book_id INT NOT NULL, \
+	order_id INT NOT NULL, \
+	quantity INT NOT NULL, \
+	order_status INT NOT NULL, \
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
+	FOREIGN KEY (user_id) REFERENCES users(id), \
+	FOREIGN KEY (order_status) REFERENCES order_status(id), \
+	FOREIGN KEY (book_id) REFERENCES books(id) \
+)", function (err, result) {
+	if (err) throw err;
+	if(result.changedRows > 0){
+		console.log("Table orders created");
+	}
+});
+
+// create the reviews table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, book_id INT NOT NULL, user_id INT NOT NULL, review TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (book_id) REFERENCES books(id), FOREIGN KEY (user_id) REFERENCES users(id)
+db.query("CREATE TABLE IF NOT EXISTS reviews ( \
+	id INT AUTO_INCREMENT PRIMARY KEY, \
+	book_id INT NOT NULL, \
+	user_id INT NOT NULL, \
+	review TEXT NOT NULL, \
+	rating INT NOT NULL, \
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
+	FOREIGN KEY (book_id) REFERENCES books(id), \
+	FOREIGN KEY (user_id) REFERENCES users(id) \
+)", function (err, result) {
+	if (err) throw err;
+	if(result.changedRows > 0){
+		console.log("Table reviews created");
+	}
+});
+
+// // create the log_status table if it doesn't exist. This is necessary because the log_status table is used to store all the log statuses of the application. The fields are: id INT AUTOINCREMENT PRIMARY KEY, status TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+// db.query("CREATE TABLE IF NOT EXISTS log_status ( \
 // 	id INT AUTO_INCREMENT PRIMARY KEY, \
-// 	book_id INT NOT NULL, \
-// 	user_id INT NOT NULL, \
-// 	review TEXT NOT NULL, \
-// 	rating INT NOT NULL, \
+// 	status TEXT NOT NULL, \
 // 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
-// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
-// 	FOREIGN KEY (book_id) REFERENCES books(id), \
-// 	FOREIGN KEY (user_id) REFERENCES users(id) \
+// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP \
 // )", function (err, result) {
 // 	if (err) throw err;
 // 	if(result.changedRows > 0){
-// 		console.log("Table reviews created");
+// 		console.log("Table log_status created");
 // 	}
 // });
 
-// // create the baskets table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id)
-// db.query("CREATE TABLE IF NOT EXISTS baskets ( \
-// 	id INT AUTO_INCREMENT PRIMARY KEY, \
-// 	user_id INT NOT NULL, \
-// 	items blob NOT NULL, \
-// 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
-// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
-// 	FOREIGN KEY (user_id) REFERENCES users(id) \
-// )", function (err, result) {
+// // create the following log statuses in the log_status table if the table is empty. These are the log statuses: Success, Error, Warning, Info
+// db.query("SELECT * FROM log_status", function (err, result) {
 // 	if (err) throw err;
-// 	if(result.changedRows > 0){
-// 		console.log("Table baskets created");
+// 	// If the log_status table is empty, create the default log statuses
+// 	if (result.length === 0) {
+// 		db.query("INSERT INTO log_status (status) VALUES (?)", ['Success']);
+// 		db.query("INSERT INTO log_status (status) VALUES (?)", ['Error']);
+// 		db.query("INSERT INTO log_status (status) VALUES (?)", ['Warning']);
+// 		db.query("INSERT INTO log_status (status) VALUES (?)", ['Info'], function (err, result) {
+// 			if (err) throw err;
+// 			console.log("Default log statuses created");
+// 		});
 // 	}
 // });
 
-// // create the orders table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, basket_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (book_id) REFERENCES books(id)
-// db.query("CREATE TABLE IF NOT EXISTS orders ( \
+// // create the logs table if it doesn't exist. This is necessary because the logs table is used to store all the logs of the application. The fields are: id INT AUTOINCREMENT PRIMARY KEY, user_id INT NOT NULL, log TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id)
+// db.query("CREATE TABLE IF NOT EXISTS logs ( \
 // 	id INT AUTO_INCREMENT PRIMARY KEY, \
 // 	user_id INT NOT NULL, \
-// 	basket_id INT NOT NULL, \
+// 	log TEXT NOT NULL, \
+// 	log_status INT NOT NULL, \
 // 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
 // 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
 // 	FOREIGN KEY (user_id) REFERENCES users(id), \
-// 	FOREIGN KEY (basket_id) REFERENCES baskets(id) \
-// )", function (err, result) {
+// 	FOREIGN KEY (log_status) REFERENCES log_status(id) \
+// 	)", function (err, result) {
 // 	if (err) throw err;
 // 	if(result.changedRows > 0){
-// 		console.log("Table orders created");
+// 		console.log("Table logs created");
 // 	}
 // });
 

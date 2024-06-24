@@ -16,8 +16,8 @@ global.db = db;
 global.query = query;
 
 // whipe deleted users daily
-// var { start_daily_jobs } = require('./functions/daily_checks');
-// start_daily_jobs();
+var { start_daily_jobs } = require('./functions/daily_checks');
+start_daily_jobs();
 
 // create the express app
 var app = express();

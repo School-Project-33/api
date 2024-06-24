@@ -2,7 +2,7 @@
 var express = require("express");
 var { contact_mail } = require("../../functions/email");
 var { send_error } = require("../../functions/error");
-const cors = require('cors');
+var cors = require('cors');
 
 // create the router
 var router = express.Router();
