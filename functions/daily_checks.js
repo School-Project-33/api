@@ -1,6 +1,4 @@
 let cron = require('cron');
-let db = require('../db');
-let { query } = require('./database_queries');
 let { send_mail } = require('./email');
 let { send_error } = require('./error');
 
@@ -13,15 +11,20 @@ async function daily_account_deletion_check(){
     if (results.length > 0){
         for (let i = 0; i < results.length; i++){
             let user = results[i];
-            let user_id = user.id;
-            let email = user.email;
-            let delete_query = "DELETE FROM users WHERE id = ?";
-            let delete_results = await query(delete_query, [user_id]);
-            if (delete_results.affectedRows > 0){
-                let message = "Your account has been deleted due to inactivity. If you believe this is an error, please contact us.";
-                send_mail(email, "Account Deletion", message);
-            } else {
-                send_error("Error deleting user account", "Error deleting user account");
+            let going_to_be_dedleted = user.scheduled_for_deletion;
+            if(going_to_be_dedleted == 1 || going_to_be_dedleted == true){
+                if(user.scheduled_for_deletion_at > now){
+                    let user_id = user.id;
+                    let email = user.email;
+                    let delete_query = "DELETE FROM users WHERE id = ?";
+                    let delete_results = await query(delete_query, [user_id]);
+                    if (delete_results.affectedRows > 0){
+                        let message = "Uw account is verwijdert.";
+                        send_mail(email, "Account Deletion", message);
+                    } else {
+                        send_error("Error deleting user account", "Error deleting user account");
+                    }
+                }
             }
         }
     }
@@ -35,5 +38,6 @@ async function start_daily_jobs(){
 };
 
 module.exports = {
-    start_daily_jobs
+    start_daily_jobs,
+    daily_account_deletion_check
 };
