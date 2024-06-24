@@ -38,6 +38,21 @@ router.get('/', async function(req, res, next){
             writers[i].last_name = user[0].last_name;
             let books = await query("SELECT * FROM books WHERE author = ?", [writers[i].id]);
             writers[i].books = books;
+            // add global book rating to each book object
+            for (let j = 0; j < books.length; j++){
+                let global_rating = await query("SELECT AVG(rating) AS global_rating FROM reviews WHERE book_id =?", [books[j].id]);
+                books[j].global_rating = global_rating[0].global_rating;
+                // get the amount of all reviews
+                let amount = await query("SELECT COUNT(*) AS amount FROM reviews WHERE book_id =?", [books[j].id]);
+                books[j].amount_of_reviews = amount[0].amount;
+            }
+            // add global book rating to the writer object
+            // get all the book_ids from the books array and get a global rating from those books and add it to the writer object
+            let global_rating = await query("SELECT AVG(rating) AS global_rating FROM reviews WHERE book_id IN (SELECT id FROM books WHERE author = ?)", [writers[i].id]);
+            writers[i].global_rating = global_rating[0].global_rating;
+            // get the amount of all reviews
+            let amount = await query("SELECT COUNT(*) AS amount FROM reviews WHERE book_id IN (SELECT id FROM books WHERE author = ?)", [writers[i].id]);
+            writers[i].amount_of_reviews = amount[0].amount;
         }
         if(writers.length > 0){
             await res.json({status: 200, message: "Success!", amount: total_writers, writers: writers});
@@ -58,6 +73,22 @@ router.get('/:id', async function(req, res, next){
         writer[0].first_name = user[0].first_name;
         writer[0].last_name = user[0].last_name;
         let books = await query("SELECT * FROM books WHERE author = ?", [writer[0].id]);
+        // add global book rating to each book object
+        for (let i = 0; i < books.length; i++){
+            let global_rating = await query("SELECT AVG(rating) AS global_rating FROM reviews WHERE book_id =?", [books[i].id]);
+            books[i].global_rating = global_rating[0].global_rating;
+            // get the amount of all reviews
+            let amount = await query("SELECT COUNT(*) AS amount FROM reviews WHERE book_id =?", [books[i].id]);
+            books[i].amount_of_reviews = amount[0].amount;
+        }
+        
+        // add global book rating to the writer object
+        // get all the book_ids from the books array and get a global rating from those books and add it to the writer object
+        let global_rating = await query("SELECT AVG(rating) AS global_rating FROM reviews WHERE book_id IN (SELECT id FROM books WHERE author = ?)", [writer[0].id]);
+        writer[0].global_rating = global_rating[0].global_rating;
+        // get the amount of all reviews
+        let amount = await query("SELECT COUNT(*) AS amount FROM reviews WHERE book_id IN (SELECT id FROM books WHERE author = ?)", [writer[0].id]);
+        writer[0].amount_of_reviews = amount[0].amount;
         writer[0].books = books;
         if(writer.length > 0){
             res.json({status: 200, message: "Success!", writer: writer[0]});
