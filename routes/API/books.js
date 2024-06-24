@@ -65,6 +65,8 @@ router.get("/", async function (req, res) {
         for (let i = 0; i < books.length; i++){
             let author = await query("SELECT user_id FROM writers WHERE id =?", [books[i].author]);
             let user = await query("SELECT first_name, last_name FROM users WHERE id =?", [author[0].user_id]);
+            let rating = await query("SELECT AVG(rating) AS rating FROM reviews WHERE book_id =?", [books[i].id]);
+            books[i].rating = rating[0].rating;
             books[i].first_name = user[0].first_name;
             books[i].last_name = user[0].last_name;
         }

@@ -284,23 +284,23 @@ db.query("CREATE TABLE IF NOT EXISTS orders ( \
 	}
 });
 
-// // create the reviews table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, book_id INT NOT NULL, user_id INT NOT NULL, review TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (book_id) REFERENCES books(id), FOREIGN KEY (user_id) REFERENCES users(id)
-// db.query("CREATE TABLE IF NOT EXISTS reviews ( \
-// 	id INT AUTO_INCREMENT PRIMARY KEY, \
-// 	book_id INT NOT NULL, \
-// 	user_id INT NOT NULL, \
-// 	review TEXT NOT NULL, \
-// 	rating INT NOT NULL, \
-// 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
-// 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
-// 	FOREIGN KEY (book_id) REFERENCES books(id), \
-// 	FOREIGN KEY (user_id) REFERENCES users(id) \
-// )", function (err, result) {
-// 	if (err) throw err;
-// 	if(result.changedRows > 0){
-// 		console.log("Table reviews created");
-// 	}
-// });
+// create the reviews table if not exists. the fields are: id INT AUTOINCREMENT PRIMARY KEY, book_id INT NOT NULL, user_id INT NOT NULL, review TEXT NOT NULL, rating INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (book_id) REFERENCES books(id), FOREIGN KEY (user_id) REFERENCES users(id)
+db.query("CREATE TABLE IF NOT EXISTS reviews ( \
+	id INT AUTO_INCREMENT PRIMARY KEY, \
+	book_id INT NOT NULL, \
+	user_id INT NOT NULL, \
+	review TEXT NOT NULL, \
+	rating INT NOT NULL, \
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, \
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \
+	FOREIGN KEY (book_id) REFERENCES books(id), \
+	FOREIGN KEY (user_id) REFERENCES users(id) \
+)", function (err, result) {
+	if (err) throw err;
+	if(result.changedRows > 0){
+		console.log("Table reviews created");
+	}
+});
 
 // // create the log_status table if it doesn't exist. This is necessary because the log_status table is used to store all the log statuses of the application. The fields are: id INT AUTOINCREMENT PRIMARY KEY, status TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 // db.query("CREATE TABLE IF NOT EXISTS log_status ( \
