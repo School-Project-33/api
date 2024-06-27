@@ -66,9 +66,15 @@ router.get("/", async function (req, res) {
             let author = await query("SELECT user_id FROM writers WHERE id =?", [books[i].author]);
             let user = await query("SELECT first_name, last_name FROM users WHERE id =?", [author[0].user_id]);
             let rating = await query("SELECT AVG(rating) AS rating FROM reviews WHERE book_id =?", [books[i].id]);
+            let amount = await query("SELECT COUNT(*) AS amount FROM reviews WHERE book_id =?", [books[i].id]);
+            books[i].amount_of_reviews = amount[0].amount;
             books[i].rating = rating[0].rating;
             books[i].first_name = user[0].first_name;
             books[i].last_name = user[0].last_name;
+        }
+        // images is a stringified array, parse it to an array
+        for (let i = 0; i < books.length; i++){
+            books[i].images = JSON.parse(books[i].images);
         }
 
         res.json({ status: 200, message: "Successfully got all books", amount: total_books, books: books });
@@ -141,6 +147,27 @@ router.get("/:writer_id/:book_title", async function (req, res) {
         // find the book with the title and the author
         let book = await query("SELECT * FROM books WHERE title = ? AND author = ?", [req.params.book_title, author[0].id]);
         if (book.length > 0) {
+            // get the rating of the book from the reviews table and also how many reviews there are
+            let rating = await query("SELECT AVG(rating) AS rating FROM reviews WHERE book_id =?", [book[0].id]);
+            let amount = await query("SELECT COUNT(*) AS amount FROM reviews WHERE book_id =?", [book[0].id]);
+            book[0].rating = rating[0].rating;
+            book[0].amount_of_reviews = amount[0].amount;
+
+            // images is a stringified array, parse it to an array
+            for (let i = 0; i < book.length; i++){
+                book[i].images = JSON.parse(book[i].images);
+            }
+            // get all the reviews
+            let reviews = await query("SELECT * FROM reviews WHERE book_id =?", [book[0].id]);
+            
+            // for each review get the first and last name of the user
+            for (let i = 0; i < reviews.length; i++){
+                let user = await query("SELECT first_name, last_name FROM users WHERE id =?", [reviews[i].user_id]);
+                reviews[i].first_name = user[0].first_name;
+                reviews[i].last_name = user[0].last_name;
+            }
+            book[0].reviews = reviews;
+
             res.json({ status: 200, message: "Success!", book: book[0] });
         } else {
             res.status(404).json({ status: 404, message: "Book not found", book: [] });
