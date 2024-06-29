@@ -33,6 +33,6 @@
     "opn": "^6.0.0",
     "pluralize": "^8.0.0",
     "swagger-themes": "^1.4.3",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.1"
   }
 }
