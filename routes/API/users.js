@@ -82,7 +82,6 @@ router.get("/verify/:email_verify_token", async function (req, res) {
 	let userInfo = await query("SELECT * FROM users WHERE email_verify_token = ?", [req.params.email_verify_token]);
 	if(userInfo.length < 1) return res.redirect("/failed.html");
 	if(userInfo[0].email_verified) return res.redirect("/success.html");
-	console.log("Writer: " + userInfo[0].seller)
 	let role;
 	if(userInfo[0].seller) {
 		role = 3;
@@ -171,12 +170,23 @@ router.post("/login", function (req, res) {
                     db.query(
                         "UPDATE users SET token = ?, token_expires_at = ? WHERE id = ?",
                         [token, new_expire_date, user.id],
-                        function (err) {
+                        async function (err) {
                             if (err) {
                                 send_error(err, "Updating token");
                                 res.status(500).send({ message: "Updating token failed" });
                                 return;
                             }
+
+							let writer = await query("SELECT * FROM writers WHERE user_id = ?", [user.id]);
+							if(writer.length > 0) {
+								writer = writer[0];
+							}
+							let writer_id = null;
+							if(writer) {
+								if(writer.id) {
+									writer_id = writer.id;
+								}
+							}
 
                             return res.send({
                                 status: 200,
@@ -188,7 +198,8 @@ router.post("/login", function (req, res) {
                                     last_name: user.last_name,
                                     email: user.email,
                                     role: user.role,
-                                    email_verified: user.email_verified
+                                    email_verified: user.email_verified,
+									writerId: writer_id
                                 }
                             });
                         }
